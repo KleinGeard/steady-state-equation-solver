@@ -32,13 +32,13 @@ namespace MarkovChains
         private List<List<decimal>> markovChain;
         private List<string> names;
         private List<SteadyStateEquation> steadyStateEquations;
-        private List<SteadyStateValue> solvedSteadyStateValues;
+        private List<SolvedSteadyStateValue> solvedSteadyStateValues;
 
         public MarkovChain(List<List<decimal>> markovChain)
         {
             this.markovChain = markovChain;
             GenerateEquations();
-            solvedSteadyStateValues = new List<SteadyStateValue>();
+            solvedSteadyStateValues = new List<SolvedSteadyStateValue>();
         }
 
         private void GenerateEquations()
@@ -71,11 +71,12 @@ namespace MarkovChains
             //focus on automating it later...
             steadyStateEquations[2].substituteEquation(steadyStateEquations[1]);//TODO: figuring out when to do this must be automated
             steadyStateEquations.ForEach(Console.WriteLine);
-            SubstituteIntoStar();
+            SubstituteIntoOne("1");
+            solvedSteadyStateValues.ForEach(Console.WriteLine);
             //now solve into one
         }
 
-        private void SubstituteIntoOne() //NOTE: This method assumes that all equations are solved in terms of π1
+        private void SubstituteIntoOne(string k) //NOTE: This method assumes that all equations are solved in terms of π1
         {
             //UNDONE: step 1: validate readiness 
 
@@ -86,14 +87,29 @@ namespace MarkovChains
                 if (s.SteadyStateValues.Count != 1 /*|| !s.SteadyStateValues[0].K.Equals("1")*/) //NOTE: second arg not need unless I decide to use a different technique
                     throw new Exception("Cannot substitute into (*): equations are not subsequently solved yet");
 
-                if (s.SteadyStateValues[0].K.Equals("1"))
+                if (s.SteadyStateValues[0].K.Equals(k))
                 {
                     sum += s.SteadyStateValues[0].Value;
                 }
             }
-            Console.WriteLine(sum);
+            //Console.WriteLine(sum);
+            SolvedSteadyStateValue solvedValue = new SolvedSteadyStateValue(k, 1 / sum);
+            solvedSteadyStateValues.Add(solvedValue);
+            adjustAll(solvedValue);
 
         }
+
+        private void adjustAll(SolvedSteadyStateValue solvedValue)
+        {
+            foreach(SteadyStateEquation equation in steadyStateEquations)
+            {
+                if (equation.SteadyStateValues.Count == 1 && equation.SteadyStateValues[0].K.Equals(solvedValue.K))
+                {
+                    solvedSteadyStateValues.Add(new SolvedSteadyStateValue(equation.Equivalent.K, equation.SteadyStateValues[0].Value *solvedValue.Value));
+                }
+            }
+        }
+
 
         private class SteadyStateEquation
         {
@@ -187,13 +203,19 @@ namespace MarkovChains
 
             public override string ToString()
             {
-                if (Value == 1)
-                    return $"π{K}";
-                else
-                    return $"{Math.Round(Value, 4)}π{K}";
+                return (Value == 1) ? $"π{K}" : $"{Math.Round(Value, 4)}π{K}";
             }
         }
 
+        private class SolvedSteadyStateValue : SteadyStateValue
+        {
+            public SolvedSteadyStateValue(string k, decimal value) : base(k, value) { }
+            
+            public override string ToString()
+            {
+                return $"π{K} = {Math.Round(Value, 4)}";
+            }
+        }
 
     }
 }

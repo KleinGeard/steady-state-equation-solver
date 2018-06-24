@@ -32,18 +32,20 @@ namespace MarkovChains
         private List<List<decimal>> markovChain;
         private List<string> names;
         private List<SteadyStateEquation> steadyStateEquations;
+        private List<SteadyStateValue> solvedSteadyStateValues;
 
         public MarkovChain(List<List<decimal>> markovChain)
         {
             this.markovChain = markovChain;
             GenerateEquations();
+            solvedSteadyStateValues = new List<SteadyStateValue>();
         }
 
         private void GenerateEquations()
         {
             steadyStateEquations = new List<SteadyStateEquation>();
             for (int i = 0; i < markovChain.Count; i++)
-                steadyStateEquations.Add(new SteadyStateEquation(markovChain[i], new SteadyStateValue((i+1).ToString(), 1)));
+                steadyStateEquations.Add(new SteadyStateEquation(markovChain[i], new SteadyStateValue((i + 1).ToString(), 1)));
         }
 
         public void Setnames(List<string> names)
@@ -63,6 +65,34 @@ namespace MarkovChains
             steadyStateEquations[1].substituteEquation(steadyStateEquations[2]);
             steadyStateEquations[2].substituteEquation(steadyStateEquations[0]);
             steadyStateEquations.ForEach(Console.WriteLine);
+            //what is the next step
+            //solve all in terms of p1...
+            //focus on the steps require to get it done first...
+            //focus on automating it later...
+            steadyStateEquations[2].substituteEquation(steadyStateEquations[1]);//TODO: figuring out when to do this must be automated
+            steadyStateEquations.ForEach(Console.WriteLine);
+            SubstituteIntoStar();
+            //now solve into one
+        }
+
+        private void SubstituteIntoOne() //NOTE: This method assumes that all equations are solved in terms of π1
+        {
+            //UNDONE: step 1: validate readiness 
+
+            //step 2: sub into (*)
+            decimal sum = 1;
+            foreach (SteadyStateEquation s in steadyStateEquations)
+            {
+                if (s.SteadyStateValues.Count != 1 /*|| !s.SteadyStateValues[0].K.Equals("1")*/) //NOTE: second arg not need unless I decide to use a different technique
+                    throw new Exception("Cannot substitute into (*): equations are not subsequently solved yet");
+
+                if (s.SteadyStateValues[0].K.Equals("1"))
+                {
+                    sum += s.SteadyStateValues[0].Value;
+                }
+            }
+            Console.WriteLine(sum);
+
         }
 
         private class SteadyStateEquation
@@ -75,7 +105,7 @@ namespace MarkovChains
                 SteadyStateValues = new List<SteadyStateValue>();
 
                 for (int i = 0; i < values.Count; i++)
-                    SteadyStateValues.Add(new SteadyStateValue((i+1).ToString(), values[i]));
+                    SteadyStateValues.Add(new SteadyStateValue((i + 1).ToString(), values[i]));
                 Equivalent = equivalent;
             }
 
@@ -86,19 +116,20 @@ namespace MarkovChains
                 for (int j = 0; j < SteadyStateValues.Count - 1; j++)
                     equation += $"{SteadyStateValues[j].ToString()} + ";
                 equation += $"{SteadyStateValues.Last().ToString()} = {Equivalent.ToString()}";
-                
+
                 return equation;
             }
 
+            #region substitution_steps
             public void substituteEquation(params SteadyStateEquation[] subEquations)
             {
-                for (int i = SteadyStateValues.Count-1; i >= 0; i--)
+                for (int i = SteadyStateValues.Count - 1; i >= 0; i--)
                     foreach (SteadyStateEquation subEquation in subEquations)
                         if (SteadyStateValues[i].K == (subEquation.Equivalent.K))
                             SubstituteValue(i, subEquation);
                 solve();
             }
-            
+
             private void SubstituteValue(int oldSteadyStateValueIndex, SteadyStateEquation newSteadyStateValues)
             {
                 decimal p = SteadyStateValues[oldSteadyStateValueIndex].Value;
@@ -117,21 +148,18 @@ namespace MarkovChains
                         Equivalent.Value = 1 - SteadyStateValues[i].Value;
                         SteadyStateValues.RemoveAt(i);
                         break;
-                    } // not entirely necessary unless showing working is required
+                    } //NOTE: not entirely necessary unless showing working is required
 
                 //step 2: adjust such that the equiv = 1
-                for (int i = SteadyStateValues.Count - 1; i >= 0; i--)
-                    SteadyStateValues[i].Value /= Equivalent.Value;
+                SteadyStateValues.ForEach(s => s.Value /= Equivalent.Value);
                 Equivalent.Value = 1;
-
-
             }
 
             public void Consolidate() //there is probably a better way to do this
             {
                 List<int> removalIndices = new List<int>();
 
-                for (int i = SteadyStateValues.Count - 1;i >= 0; i--)
+                for (int i = SteadyStateValues.Count - 1; i >= 0; i--)
                     for (int j = SteadyStateValues.Count - 1; j >= 0; j--)
                         if (i != j && SteadyStateValues[i].K.Equals(SteadyStateValues[j].K) && !removalIndices.Contains(j))
                         {
@@ -142,6 +170,7 @@ namespace MarkovChains
 
                 removalIndices.ForEach(i => SteadyStateValues.RemoveAt(i));
             }
+            #endregion substitution_steps
 
         }
 
@@ -149,7 +178,7 @@ namespace MarkovChains
         {
             public string K { get; set; }
             public decimal Value { get; set; }
-            
+
             public SteadyStateValue(string k, decimal value)
             {
                 K = k;
@@ -158,9 +187,9 @@ namespace MarkovChains
 
             public override string ToString()
             {
-                if (Value == 1) 
+                if (Value == 1)
                     return $"π{K}";
-                else 
+                else
                     return $"{Math.Round(Value, 4)}π{K}";
             }
         }
@@ -170,63 +199,4 @@ namespace MarkovChains
 }
 
 #region dump
-//public bool isValidMarkovChain()
-//{
-//    foreach (List<decimal> list in markovChain)
-//    {
-//        decimal rowSum = 0;
-//        foreach (decimal n in list)
-//        {
-//            if (n < 0)
-//                return false;
-//            rowSum += n;
-//        }
-
-//        if (rowSum != 1 || list.Count != markovChain.Count)
-//            return false;
-//    }
-
-//    return true;
-//}
-//int first = 0;
-//int second = 1;
-//List<decimal> row1 = markovChain[first];
-//List<decimal> row2 = markovChain[second];
-
-//string equation = "";
-
-//            for (int i = 0; i<count; i++)
-//            {
-
-
-
-//                if (i == first) // within (*)?
-//                {
-//                    equation += $"{row2[i]}(";
-//                    for (int j = 0; j<count; j++)
-//                        if (j<count - 1) equation += $"{row1[j]}pi_{j} + ";
-//                    equation += $"{row1[count-1]}pi_{count-1})";
-//                    if (i<count - 1) equation += " + ";
-//                } else
-//                {
-//                    equation += $"{row2[i]}pi_{i}";
-//                    if (i<count - 1) equation += " + ";
-//                }
-//            }
-//            Console.WriteLine(equation);
-
-//public void solveSteadyStates()
-//{
-//    int count = markovChain.Count;
-//    for (int i = 0; i < count; i++)
-//    {
-//        string assertion = "";
-
-//        for (int j = 0; j < count; j++)
-//            if (j < count - 1) assertion += $"{markovChain[i][j]}pi_{j} + ";
-
-//        assertion += $"{markovChain[i][count - 1]}pi_{markovChain[i][count - 1]} = pi_{i}";
-//        Console.WriteLine(assertion);
-//    }
-//}
 #endregion dump

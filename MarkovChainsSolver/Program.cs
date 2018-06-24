@@ -120,8 +120,7 @@ namespace MarkovChains
                     } // not entirely necessary unless showing working is required
 
                 //step 2: adjust such that the equiv = 1
-                for (int i = SteadyStateValues.Count - 1; i >= 0; i--)
-                    SteadyStateValues[i].Value /= Equivalent.Value;
+                SteadyStateValues.ForEach(s => s.Value /= Equivalent.Value);
                 Equivalent.Value = 1;
 
 
@@ -170,63 +169,4 @@ namespace MarkovChains
 }
 
 #region dump
-//public bool isValidMarkovChain()
-//{
-//    foreach (List<decimal> list in markovChain)
-//    {
-//        decimal rowSum = 0;
-//        foreach (decimal n in list)
-//        {
-//            if (n < 0)
-//                return false;
-//            rowSum += n;
-//        }
-
-//        if (rowSum != 1 || list.Count != markovChain.Count)
-//            return false;
-//    }
-
-//    return true;
-//}
-//int first = 0;
-//int second = 1;
-//List<decimal> row1 = markovChain[first];
-//List<decimal> row2 = markovChain[second];
-
-//string equation = "";
-
-//            for (int i = 0; i<count; i++)
-//            {
-
-
-
-//                if (i == first) // within (*)?
-//                {
-//                    equation += $"{row2[i]}(";
-//                    for (int j = 0; j<count; j++)
-//                        if (j<count - 1) equation += $"{row1[j]}pi_{j} + ";
-//                    equation += $"{row1[count-1]}pi_{count-1})";
-//                    if (i<count - 1) equation += " + ";
-//                } else
-//                {
-//                    equation += $"{row2[i]}pi_{i}";
-//                    if (i<count - 1) equation += " + ";
-//                }
-//            }
-//            Console.WriteLine(equation);
-
-//public void solveSteadyStates()
-//{
-//    int count = markovChain.Count;
-//    for (int i = 0; i < count; i++)
-//    {
-//        string assertion = "";
-
-//        for (int j = 0; j < count; j++)
-//            if (j < count - 1) assertion += $"{markovChain[i][j]}pi_{j} + ";
-
-//        assertion += $"{markovChain[i][count - 1]}pi_{markovChain[i][count - 1]} = pi_{i}";
-//        Console.WriteLine(assertion);
-//    }
-//}
 #endregion dump

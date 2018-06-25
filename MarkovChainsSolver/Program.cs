@@ -43,7 +43,7 @@ namespace MarkovChains
     {
         private List<List<decimal>> markovChain;
         private List<string> names;
-        private List<SteadyStateEquation> steadyStateEquations;
+        private List<SteadyStateEquation> steadyStateEquations; //TODO: Make this a hashtable with the equiv values as keys
         private List<SolvedSteadyStateValue> solvedSteadyStateValues;
 
         public MarkovChain(List<List<decimal>> markovChain)
@@ -75,16 +75,18 @@ namespace MarkovChains
             steadyStateEquations.ForEach(s => s.solve());
             steadyStateEquations.ForEach(Console.WriteLine);
             Console.WriteLine();
-            //steadyStateEquations[0].substituteEquation(steadyStateEquations[1]);
-            steadyStateEquations[1].substituteEquation(steadyStateEquations[2]);
-            steadyStateEquations[2].substituteEquation(steadyStateEquations[1]);
+            
+            for(int i = 1; i < steadyStateEquations.Count; i++)
+                for (int j = 1; j < steadyStateEquations.Count; j++)
+                    if (i != j)
+                        steadyStateEquations[j].substituteEquation(steadyStateEquations[i]);
 
-            //steadyStateEquations[0].substituteEquation(steadyStateEquations[1], steadyStateEquations[2]);
-            //steadyStateEquations[1].substituteEquation(steadyStateEquations[0]);
-            //steadyStateEquations[2].substituteEquation(steadyStateEquations[1]);
-            //steadyStateEquations[0].substituteEquation(steadyStateEquations[2]);
             steadyStateEquations.ForEach(Console.WriteLine);
             Console.WriteLine();
+
+
+
+
             //what is the next step
             //solve all in terms of p1...
             //focus on the steps require to get it done first...
@@ -236,4 +238,18 @@ namespace MarkovChains
 }
 
 #region dump
+//for (int n = 0; n < steadyStateEquations[i].SteadyStateValues.Count; n++)
+//{
+//    if (!steadyStateEquations[i].SteadyStateValues[n].K.Equals("1"))
+//    {
+//        for (int j = 1; j < steadyStateEquations.Count; j++)
+//        {
+//            if (steadyStateEquations[j].Equivalent.K.Equals(steadyStateEquations[i].SteadyStateValues[n].K))
+//            {
+//                steadyStateEquations[i].substituteEquation(steadyStateEquations[j]);
+//                break;
+//            }
+//        }
+//    }
+//}
 #endregion dump

@@ -72,60 +72,45 @@ namespace MarkovChains
         {
             steadyStateEquations.ForEach(Console.WriteLine);
             Console.WriteLine();
+
             steadyStateEquations.ForEach(s => s.solve());
             steadyStateEquations.ForEach(Console.WriteLine);
             Console.WriteLine();
-            
-            for(int i = 1; i < steadyStateEquations.Count; i++)
-                for (int j = 1; j < steadyStateEquations.Count; j++)
-                    if (i != j)
-                        steadyStateEquations[j].substituteEquation(steadyStateEquations[i]);
 
+            steadyStateEquations.First().SteadyStateValues.Clear();
+            steadyStateEquations.First().SteadyStateValues.Add(new SteadyStateValue(steadyStateEquations.First().Equivalent.K, 1));
             steadyStateEquations.ForEach(Console.WriteLine);
             Console.WriteLine();
 
-
-
-
-            //what is the next step
-            //solve all in terms of p1...
-            //focus on the steps require to get it done first...
-            //focus on automating it later...
-            //steadyStateEquations[2].substituteEquation(steadyStateEquations[1]);//TODO: figuring out when to do this must be automated
-            //steadyStateEquations.ForEach(Console.WriteLine);
-            //SubstituteIntoOne("1");
-            //solvedSteadyStateValues.ForEach(Console.WriteLine);
-            //now solve into one
-        }
-
-        private void SubstituteIntoOne(string k) //NOTE: This method assumes that all equations are solved in terms of π1
-        {
-            //UNDONE: step 1: validate readiness 
-
-            //step 2: sub into (*)
-            decimal sum = 1;
-            foreach (SteadyStateEquation s in steadyStateEquations)
+            for (int i = 1; i < steadyStateEquations.Count; i++)
             {
-                if (s.SteadyStateValues.Count != 1 && !s.Equivalent.K.Equals("1")) //NOTE: second arg not need unless I decide to use a different technique
-                    throw new Exception("Cannot substitute into (*): equations are not subsequently solved yet");
+                for (int j = 1; j < steadyStateEquations.Count; j++)
+                                    if (i != j)
+                                        steadyStateEquations[j].substituteEquation(steadyStateEquations[i]);
 
-                if (s.SteadyStateValues[0].K.Equals(k))
-                {
-                    sum += s.SteadyStateValues[0].Value;
-                }
+                steadyStateEquations.ForEach(Console.WriteLine);
+                Console.WriteLine();
             }
-            //Console.WriteLine(sum);
-            SolvedSteadyStateValue solvedValue = new SolvedSteadyStateValue(k, 1 / sum);
-            solvedSteadyStateValues.Add(solvedValue);
-            adjustAll(solvedValue);
-
+            
+            SubstituteIntoOne();
+            solvedSteadyStateValues.ForEach(Console.WriteLine);
+            Console.WriteLine();
         }
 
-        private void adjustAll(SolvedSteadyStateValue solvedValue)
+        private void SubstituteIntoOne() //NOTE: This method assumes that all equations are solved in terms of π1
         {
-            foreach(SteadyStateEquation equation in steadyStateEquations)
-                if (equation.SteadyStateValues.Count == 1 && equation.SteadyStateValues[0].K.Equals(solvedValue.K))
-                    solvedSteadyStateValues.Add(new SolvedSteadyStateValue(equation.Equivalent.K, equation.SteadyStateValues[0].Value *solvedValue.Value));
+            decimal sum = 0;
+
+            foreach (SteadyStateEquation s in steadyStateEquations)
+                sum += s.SteadyStateValues.First().Value;
+            
+            adjustAll(1 / sum);
+        }
+
+        private void adjustAll(decimal solvedValue)
+        {
+            foreach (SteadyStateEquation equation in steadyStateEquations)
+                solvedSteadyStateValues.Add(new SolvedSteadyStateValue(equation.Equivalent.K, equation.SteadyStateValues.First().Value * solvedValue));
         }
 
         private class SteadyStateEquation

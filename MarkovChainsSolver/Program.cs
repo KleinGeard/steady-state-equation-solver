@@ -12,11 +12,24 @@ namespace MarkovChains
     {
         static void Main(string[] args)
         {
+            //List<List<decimal>> mchain = new List<List<decimal>>
+            //{
+            //    new List<decimal>{0.75m, 0m, 0.25m},
+            //    new List<decimal>{0.25m, 2/3m, 0.25m},
+            //    new List<decimal>{0m,  1/3m,  0.5m},
+            //};
+            //List<List<decimal>> mchain = new List<List<decimal>>
+            //{
+            //    new List<decimal>{0.65m, 0.15m, 0.1m},
+            //    new List<decimal>{0.25m, 0.65m, 0.4m},
+            //    new List<decimal>{0.1m,  0.2m,  0.5m},
+            //};
             List<List<decimal>> mchain = new List<List<decimal>>
             {
-                new List<decimal>{0.65m, 0.15m, 0.1m},
-                new List<decimal>{0.25m, 0.65m, 0.4m},
-                new List<decimal>{0.1m,  0.2m,  0.5m},
+                new List<decimal>{0m, 2/5m, 1/3m, 0m},
+                new List<decimal>{2/3m, 0m, 1/3m, 2/3m},
+                new List<decimal>{1/3m, 1/5m, 0m, 1/3m},
+                new List<decimal>{0m, 2/5m, 1/3m, 0m},
             };
 
             MarkovChain markovChain = new MarkovChain(mchain);
@@ -28,7 +41,6 @@ namespace MarkovChains
 
     class MarkovChain
     {
-
         private List<List<decimal>> markovChain;
         private List<string> names;
         private List<SteadyStateEquation> steadyStateEquations;
@@ -59,20 +71,28 @@ namespace MarkovChains
         public void SolveSteadyStates()
         {
             steadyStateEquations.ForEach(Console.WriteLine);
+            Console.WriteLine();
             steadyStateEquations.ForEach(s => s.solve());
             steadyStateEquations.ForEach(Console.WriteLine);
-            steadyStateEquations[0].substituteEquation(steadyStateEquations[1]);
+            Console.WriteLine();
+            //steadyStateEquations[0].substituteEquation(steadyStateEquations[1]);
             steadyStateEquations[1].substituteEquation(steadyStateEquations[2]);
-            steadyStateEquations[2].substituteEquation(steadyStateEquations[0]);
+            steadyStateEquations[2].substituteEquation(steadyStateEquations[1]);
+
+            //steadyStateEquations[0].substituteEquation(steadyStateEquations[1], steadyStateEquations[2]);
+            //steadyStateEquations[1].substituteEquation(steadyStateEquations[0]);
+            //steadyStateEquations[2].substituteEquation(steadyStateEquations[1]);
+            //steadyStateEquations[0].substituteEquation(steadyStateEquations[2]);
             steadyStateEquations.ForEach(Console.WriteLine);
+            Console.WriteLine();
             //what is the next step
             //solve all in terms of p1...
             //focus on the steps require to get it done first...
             //focus on automating it later...
-            steadyStateEquations[2].substituteEquation(steadyStateEquations[1]);//TODO: figuring out when to do this must be automated
-            steadyStateEquations.ForEach(Console.WriteLine);
-            SubstituteIntoOne("1");
-            solvedSteadyStateValues.ForEach(Console.WriteLine);
+            //steadyStateEquations[2].substituteEquation(steadyStateEquations[1]);//TODO: figuring out when to do this must be automated
+            //steadyStateEquations.ForEach(Console.WriteLine);
+            //SubstituteIntoOne("1");
+            //solvedSteadyStateValues.ForEach(Console.WriteLine);
             //now solve into one
         }
 
@@ -84,7 +104,7 @@ namespace MarkovChains
             decimal sum = 1;
             foreach (SteadyStateEquation s in steadyStateEquations)
             {
-                if (s.SteadyStateValues.Count != 1 /*|| !s.SteadyStateValues[0].K.Equals("1")*/) //NOTE: second arg not need unless I decide to use a different technique
+                if (s.SteadyStateValues.Count != 1 && !s.Equivalent.K.Equals("1")) //NOTE: second arg not need unless I decide to use a different technique
                     throw new Exception("Cannot substitute into (*): equations are not subsequently solved yet");
 
                 if (s.SteadyStateValues[0].K.Equals(k))
@@ -102,14 +122,9 @@ namespace MarkovChains
         private void adjustAll(SolvedSteadyStateValue solvedValue)
         {
             foreach(SteadyStateEquation equation in steadyStateEquations)
-            {
                 if (equation.SteadyStateValues.Count == 1 && equation.SteadyStateValues[0].K.Equals(solvedValue.K))
-                {
                     solvedSteadyStateValues.Add(new SolvedSteadyStateValue(equation.Equivalent.K, equation.SteadyStateValues[0].Value *solvedValue.Value));
-                }
-            }
         }
-
 
         private class SteadyStateEquation
         {

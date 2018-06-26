@@ -103,9 +103,7 @@ namespace MarkovChains
         private static void writeToTex(string s)
         {
             if (logging)
-            {
                 texString.AppendLine(s);
-            }
         }
 
         public string findSteadyStates()
@@ -123,20 +121,17 @@ namespace MarkovChains
             logging = true;
 
             for (int i = 1; i < steadyStateEquations.Count; i++)
-            {
                 for (int j = 1; j < steadyStateEquations.Count; j++)
-                {
                     if (i != j)
                     {
                         writeToTex($"Substitute {steadyStateEquations[i].Equivalent} into {steadyStateEquations[j].Equivalent}\n");
                         steadyStateEquations[j].substituteEquation(steadyStateEquations[i]);
                     }
-                }
-            }
-            
-            SubstituteIntoOne();
 
             writeEquations();
+
+            SubstituteIntoOne();
+            
             writeSolvedValues();
 
             return texString.ToString();
@@ -146,16 +141,40 @@ namespace MarkovChains
         {
             decimal sum = 0;
 
-            foreach (SteadyStateEquation s in steadyStateEquations)
-                sum += s.SteadyStateValues.First().Value;
-            
+            //foreach (SteadyStateEquation s in steadyStateEquations)
+            //    sum += s.SteadyStateValues.First().Value;
+
+            string equation = "";
+            for (int i = 0; i < steadyStateEquations.Count - 1; i++)
+            {
+                sum += steadyStateEquations[i].SteadyStateValues.First().Value;
+                equation += $"{steadyStateEquations[i].SteadyStateValues.First()} + ";
+            }
+            sum += steadyStateEquations.Last().SteadyStateValues.First().Value;
+
+            equation += $"{steadyStateEquations.Last().SteadyStateValues.First()} = 1";
+            writeSubstituteIntoOneTex(sum, equation);
+
             adjustAll(1 / sum);
         }
 
-        private void adjustAll(decimal solvedValue)
+        private void writeSubstituteIntoOneTex(decimal sum, string equation)
+        {
+            writeToTex(equation);
+            writeToTex($"{Math.Round(sum, 4)}p{steadyStateEquations.Last().SteadyStateValues.First().K} = 1");
+            writeToTex($"1 % {Math.Round(sum, 4)}p{steadyStateEquations.Last().SteadyStateValues.First().K} = p{steadyStateEquations.Last().SteadyStateValues.First().K}");
+            writeToTex($"p{steadyStateEquations.Last().SteadyStateValues.First().K} = {Math.Round(1 / sum, 4)}");
+            writeToTex("");
+        }
+
+        private void adjustAll(decimal solvedValue) //TODO: Fix up - D.R.Y
         {
             foreach (SteadyStateEquation equation in steadyStateEquations)
+            {
+                writeToTex($"p{equation.Equivalent.K} = {Math.Round(equation.SteadyStateValues.First().Value, 4)} x {Math.Round(solvedValue, 4)} = {Math.Round(equation.SteadyStateValues.First().Value * solvedValue, 4)}");
                 solvedSteadyStateValues.Add(new SolvedSteadyStateValue(equation.Equivalent.K, equation.SteadyStateValues.First().Value * solvedValue));
+            }
+            writeToTex("");
         }
 
         private class SteadyStateEquation

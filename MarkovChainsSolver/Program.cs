@@ -19,19 +19,19 @@ namespace MarkovChains
             //    new List<decimal>{0.25m, 2/3m, 0.25m},
             //    new List<decimal>{0m,  1/3m,  0.5m},
             //};
-            //List<List<decimal>> mchain = new List<List<decimal>>
-            //{
-            //    new List<decimal>{0.65m, 0.15m, 0.1m},
-            //    new List<decimal>{0.25m, 0.65m, 0.4m},
-            //    new List<decimal>{0.1m,  0.2m,  0.5m},
-            //};
             List<List<decimal>> mchain = new List<List<decimal>>
             {
-                new List<decimal>{0m, 2/5m, 1/3m, 0m},
-                new List<decimal>{2/3m, 0m, 1/3m, 2/3m},
-                new List<decimal>{1/3m, 1/5m, 0m, 1/3m},
-                new List<decimal>{0m, 2/5m, 1/3m, 0m},
+                new List<decimal>{0.65m, 0.15m, 0.1m},
+                new List<decimal>{0.25m, 0.65m, 0.4m},
+                new List<decimal>{0.1m,  0.2m,  0.5m},
             };
+            //List<List<decimal>> mchain = new List<List<decimal>>
+            //{
+            //    new List<decimal>{0m, 2/5m, 1/3m, 0m},
+            //    new List<decimal>{2/3m, 0m, 1/3m, 2/3m},
+            //    new List<decimal>{1/3m, 1/5m, 0m, 1/3m},
+            //    new List<decimal>{0m, 2/5m, 1/3m, 0m},
+            //};
 
             MarkovChain markovChain = new MarkovChain(mchain);
             Console.WriteLine(markovChain.findSteadyStates());
@@ -47,7 +47,6 @@ namespace MarkovChains
         private List<SteadyStateEquation> steadyStateEquations; //TODO: Make this a hashtable with the equiv values as keys
         private List<SolvedSteadyStateValue> solvedSteadyStateValues;
         private static StringBuilder texString;
-        private static bool logging = false;
 
         public MarkovChain(List<List<decimal>> markovChain)
         {
@@ -102,7 +101,6 @@ namespace MarkovChains
 
         private static void writeToTex(string s)
         {
-            if (logging)
                 texString.AppendLine(s);
         }
 
@@ -118,7 +116,6 @@ namespace MarkovChains
             steadyStateEquations.First().SteadyStateValues.Add(new SteadyStateValue(steadyStateEquations.First().Equivalent.K, 1));
 
             writeEquations();
-            logging = true;
 
             for (int i = 1; i < steadyStateEquations.Count; i++)
                 for (int j = 1; j < steadyStateEquations.Count; j++)
@@ -128,6 +125,7 @@ namespace MarkovChains
                         steadyStateEquations[j].substituteEquation(steadyStateEquations[i]);
                     }
 
+            writeToTex("");
             writeEquations();
 
             SubstituteIntoOne();
@@ -140,9 +138,6 @@ namespace MarkovChains
         private void SubstituteIntoOne() //NOTE: This method assumes that all equations are solved in terms of π1
         {
             decimal sum = 0;
-
-            //foreach (SteadyStateEquation s in steadyStateEquations)
-            //    sum += s.SteadyStateValues.First().Value;
 
             string equation = "";
             for (int i = 0; i < steadyStateEquations.Count - 1; i++)
@@ -158,8 +153,10 @@ namespace MarkovChains
             adjustAll(1 / sum);
         }
 
-        private void writeSubstituteIntoOneTex(decimal sum, string equation)
+        private void writeSubstituteIntoOneTex(decimal sum, string equation) //TODO - imporve code - D.R.Y
         {
+            writeToTex($"Substitute p{steadyStateEquations.Last().SteadyStateValues.First().K} into 1");
+            writeToTex("");
             writeToTex(equation);
             writeToTex($"{Math.Round(sum, 4)}p{steadyStateEquations.Last().SteadyStateValues.First().K} = 1");
             writeToTex($"1 % {Math.Round(sum, 4)}p{steadyStateEquations.Last().SteadyStateValues.First().K} = p{steadyStateEquations.Last().SteadyStateValues.First().K}");
@@ -225,10 +222,7 @@ namespace MarkovChains
                         writeToTex(ToString());
                     }
                         
-                    
                 solve();
-
-                writeToTex("");
             }
 
             private void SubstituteValue(int oldSteadyStateValueIndex, SteadyStateEquation SubEquation)
@@ -245,6 +239,7 @@ namespace MarkovChains
             {
                 Consolidate();
                 bool needsSolving = false;
+
                 //step 1: take relevant value out
                 for (int i = SteadyStateValues.Count - 1; i >= 0; i--)
                     if (SteadyStateValues[i].K.Equals(Equivalent.K))
@@ -254,14 +249,29 @@ namespace MarkovChains
                         needsSolving = true;
                         break;
                     } //NOTE: not entirely necessary unless showing working is required
+
                 if (!needsSolving)
                     return;
+
                 writeToTex(ToString());
 
                 //step 2: adjust such that the equiv = 1
-                SteadyStateValues.ForEach(s => s.Value /= Equivalent.Value);
+                string equationString = "";
+                for (int i = 0; i < SteadyStateValues.Count-1; i++)
+                {
+                    equationString += $"({SteadyStateValues[i]} / {Math.Round(Equivalent.Value, 4)}) + ";
+                    SteadyStateValues[i].Value /= Equivalent.Value;
+                }
+                
+
+                equationString += $"({SteadyStateValues.Last()} / {Math.Round(Equivalent.Value, 4)}) = p{Equivalent.K}";
+                SteadyStateValues.Last().Value /= Equivalent.Value;
+
                 Equivalent.Value = 1;
+                writeToTex(equationString);
+                
                 writeToTex(ToString());
+                writeToTex("");
             }
 
             public void Consolidate() //there is probably a better way to do this

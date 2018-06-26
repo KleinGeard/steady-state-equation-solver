@@ -184,8 +184,8 @@ namespace MarkovChains
                 string equation = "";
 
                 for (int j = 0; j < SteadyStateValues.Count - 1; j++)
-                    equation += $"{SteadyStateValues[j].ToString()} + ";
-                equation += $"{SteadyStateValues.Last().ToString()} = {Equivalent.ToString()}";
+                    equation += $"{SteadyStateValues[j]} + ";
+                equation += $"{SteadyStateValues.Last()} = {Equivalent}";
 
                 return equation;
             }

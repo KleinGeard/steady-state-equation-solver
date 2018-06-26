@@ -53,23 +53,7 @@ namespace MarkovChains
             this.markovChain = markovChain;
             GenerateEquations();
             solvedSteadyStateValues = new List<SolvedSteadyStateValue>();
-            InitialiseTexString();
-        }
-
-        private void InitialiseTexString()
-        {
             texString = new StringBuilder();
-            //    string starString = "";
-            //    for (int i = 0; i < steadyStateEquations.Count - 1; i++)
-            //    {
-            //        texString.AppendLine(steadyStateEquations[i] + $"      ({i+1})");
-            //        starString += $"{steadyStateEquations[i].Equivalent} + ";
-            //    }
-
-            //    texString.AppendLine(steadyStateEquations.Last() + $"      ({steadyStateEquations.Count})");
-
-            //    starString += $"{steadyStateEquations.Last().Equivalent} = 1      (*)";
-            //    texString.AppendLine(starString);
         }
 
         private void GenerateEquations()

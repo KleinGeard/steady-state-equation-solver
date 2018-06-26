@@ -88,7 +88,7 @@ namespace MarkovChains
                 texString.AppendLine(s);
         }
 
-        public string findSteadyStates()
+        public string findSteadyStates() //TODO: break up into multiple smaller methods
         {
             writeEquations();
 
@@ -96,7 +96,7 @@ namespace MarkovChains
             writeEquations();
 
             steadyStateEquations.First().SteadyStateValues.Clear();
-            steadyStateEquations.First().SteadyStateValues.Add(new SteadyStateValue(steadyStateEquations.First().Equivalent.K, 1));
+            steadyStateEquations.First().SteadyStateValues.Add(new SteadyStateValue(steadyStateEquations.First().Equivalent.piName, 1));
             writeEquations();
 
             for (int i = 1; i < steadyStateEquations.Count; i++)
@@ -126,7 +126,6 @@ namespace MarkovChains
                 sum += subableValue.Value;
                 equation += $"{subableValue} + ";
             }
-
             SteadyStateValue lastSubableValue = steadyStateEquations.Last().SteadyStateValues.First();
             sum += lastSubableValue.Value;
             equation += $"{lastSubableValue} = 1";
@@ -138,7 +137,7 @@ namespace MarkovChains
 
         private void writeSubstituteIntoOneTex(decimal sum, string equation)
         {
-            string piName = steadyStateEquations.Last().SteadyStateValues.First().K;
+            string piName = steadyStateEquations.Last().SteadyStateValues.First().piName;
             decimal roundedSum = Math.Round(sum, 4);
             
             writeToTex($"Substitute p{piName} into 1");
@@ -155,7 +154,7 @@ namespace MarkovChains
             foreach (SteadyStateEquation equation in steadyStateEquations)
             {
                 decimal relativeValue = equation.SteadyStateValues.First().Value;
-                string piName = equation.Equivalent.K;
+                string piName = equation.Equivalent.piName;
 
                 SolvedSteadyStateValue solvedSteadyStateValue = new SolvedSteadyStateValue(piName, relativeValue * pi1Value);
                 solvedSteadyStateValues.Add(solvedSteadyStateValue);
@@ -206,7 +205,7 @@ namespace MarkovChains
             public void substituteEquation(SteadyStateEquation subEquation)
             {
                 for (int i = SteadyStateValues.Count - 1; i >= 0; i--)
-                    if (SteadyStateValues[i].K == (subEquation.Equivalent.K))
+                    if (SteadyStateValues[i].piName == (subEquation.Equivalent.piName))
                     {
                         writeToTex(ToString().Replace(SteadyStateValues[i].ToString(), Math.Round(SteadyStateValues[i].Value, 4) +  subEquation.ValuesAsString()));
                         SubstituteValue(i, subEquation);
@@ -223,47 +222,56 @@ namespace MarkovChains
                 decimal p = SteadyStateValues[oldSteadyStateValueIndex].Value;
 
                 foreach (SteadyStateValue newSteadyStateValue in SubEquation.SteadyStateValues)
-                    SteadyStateValues.Add(new SteadyStateValue(newSteadyStateValue.K, newSteadyStateValue.Value * p));
+                    SteadyStateValues.Add(new SteadyStateValue(newSteadyStateValue.piName, newSteadyStateValue.Value * p));
 
                 SteadyStateValues.RemoveAt(oldSteadyStateValueIndex);
             }
 
-            public void solve(bool fromSubstituteEquation = true)
+            #region solve
+            public void solve(bool fromSubstituteEquation = true) //TODO: break up into multiple smaller methods
             {
                 bool needsSolving = false;
+                SolveStepTwo(ref needsSolving);
+
+                if (!needsSolving || Equivalent.Value == 1)
+                    return;
+
+                writeToTex(ToString());
+
+                string equationString = "";
+                solveStepTwo(ref equationString);
+
+                writeToTex(equationString);
+                writeToTex(ToString());
+            }
+            
+            private void SolveStepTwo(ref bool needsSolving) //NOTE: not entirely necessary unless showing working is required
+            {
                 //step 1: take relevant value out
                 for (int i = SteadyStateValues.Count - 1; i >= 0; i--)
-                    if (SteadyStateValues[i].K.Equals(Equivalent.K))
+                    if (SteadyStateValues[i].piName.Equals(Equivalent.piName))
                     {
                         Equivalent.Value = 1 - SteadyStateValues[i].Value;
                         SteadyStateValues.RemoveAt(i);
                         needsSolving = true;
                         break;
-                    } //NOTE: not entirely necessary unless showing working is required
-                
-                if (!needsSolving || Equivalent.Value == 1)
-                    return;
-                    
+                    } 
+            }
 
-                writeToTex(ToString());
-
+            private void solveStepTwo(ref string equationString)
+            {
                 //step 2: adjust such that the equiv = 1
-                string equationString = "";
-                for (int i = 0; i < SteadyStateValues.Count-1; i++)
+                for (int i = 0; i < SteadyStateValues.Count - 1; i++)
                 {
-                    equationString += $"({SteadyStateValues[i]} / {Math.Round(Equivalent.Value, 4)}) + ";
+                    equationString += $"({SteadyStateValues[i]} / {Equivalent.getRoundedValue()}) + ";
                     SteadyStateValues[i].Value /= Equivalent.Value;
                 }
-                
-
-                equationString += $"({SteadyStateValues.Last()} / {Math.Round(Equivalent.Value, 4)}) = p{Equivalent.K}";
+                equationString += $"({SteadyStateValues.Last()} / {Equivalent.getRoundedValue()}) = p{Equivalent.piName}";
                 SteadyStateValues.Last().Value /= Equivalent.Value;
 
                 Equivalent.Value = 1;
-                writeToTex(equationString);
-                
-                writeToTex(ToString());
             }
+            #endregion solve
 
             public void Consolidate() //there is probably a better way to do this
             {
@@ -271,7 +279,7 @@ namespace MarkovChains
 
                 for (int i = SteadyStateValues.Count - 1; i >= 0; i--)
                     for (int j = SteadyStateValues.Count - 1; j >= 0; j--)
-                        if (i != j && SteadyStateValues[i].K.Equals(SteadyStateValues[j].K) && !removalIndices.Contains(j))
+                        if (i != j && SteadyStateValues[i].piName.Equals(SteadyStateValues[j].piName) && !removalIndices.Contains(j))
                         {
                             decimal p = SteadyStateValues[i].Value;
                             removalIndices.Add(i);
@@ -279,6 +287,7 @@ namespace MarkovChains
                         }
 
                 removalIndices.ForEach(i => SteadyStateValues.RemoveAt(i));
+
                 writeToTex(ToString());
             }
             #endregion substitution_steps
@@ -287,18 +296,23 @@ namespace MarkovChains
 
         private class SteadyStateValue
         {
-            public string K { get; set; }
+            public string piName { get; set; }
             public decimal Value { get; set; }
 
             public SteadyStateValue(string k, decimal value)
             {
-                K = k;
+                piName = k;
                 Value = value;
             }
 
             public override string ToString()
             {
-                return (Value == 1) ? $"p{K}" : $"{Math.Round(Value, 4)}π{K}";
+                return (Value == 1) ? $"p{piName}" : $"{Math.Round(Value, 4)}π{piName}";
+            }
+
+            public decimal getRoundedValue()
+            {
+                return Math.Round(Value, 4);
             }
         }
 
@@ -308,7 +322,7 @@ namespace MarkovChains
             
             public override string ToString()
             {
-                return $"p{K} = {Math.Round(Value, 4)}";
+                return $"p{piName} = {Math.Round(Value, 4)}";
             }
         }
 

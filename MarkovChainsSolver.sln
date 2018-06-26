@@ -5,8 +5,6 @@ VisualStudioVersion = 15.0.27703.2035
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MarkovChainsSolver", "MarkovChainsSolver\MarkovChainsSolver.csproj", "{76DC30C0-151B-4133-A33C-3307FEBFC29E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SteadyStateSolverWebApplication", "SteadyStateSolverWebApplication\SteadyStateSolverWebApplication.csproj", "{2BB2BE15-40D1-438D-BB28-9D2E2C0FF34C}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -17,10 +15,6 @@ Global
 		{76DC30C0-151B-4133-A33C-3307FEBFC29E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{76DC30C0-151B-4133-A33C-3307FEBFC29E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{76DC30C0-151B-4133-A33C-3307FEBFC29E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2BB2BE15-40D1-438D-BB28-9D2E2C0FF34C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2BB2BE15-40D1-438D-BB28-9D2E2C0FF34C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2BB2BE15-40D1-438D-BB28-9D2E2C0FF34C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2BB2BE15-40D1-438D-BB28-9D2E2C0FF34C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

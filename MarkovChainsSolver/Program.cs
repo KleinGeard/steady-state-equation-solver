@@ -136,6 +136,7 @@ namespace MarkovChains
             
             SubstituteIntoOne();
 
+            writeEquations();
             writeSolvedValues();
 
             return texString.ToString();
@@ -224,15 +225,18 @@ namespace MarkovChains
             public void solve()
             {
                 Consolidate();
-
+                bool needsSolving = false;
                 //step 1: take relevant value out
                 for (int i = SteadyStateValues.Count - 1; i >= 0; i--)
                     if (SteadyStateValues[i].K.Equals(Equivalent.K))
                     {
                         Equivalent.Value = 1 - SteadyStateValues[i].Value;
                         SteadyStateValues.RemoveAt(i);
+                        needsSolving = true;
                         break;
                     } //NOTE: not entirely necessary unless showing working is required
+                if (!needsSolving)
+                    return;
                 writeToTex(ToString());
 
                 //step 2: adjust such that the equiv = 1

@@ -19,19 +19,19 @@ namespace MarkovChains
             //    new List<decimal>{0.25m, 2/3m, 0.25m},
             //    new List<decimal>{0m,  1/3m,  0.5m},
             //};
-            List<List<decimal>> mchain = new List<List<decimal>>
-            {
-                new List<decimal>{0.65m, 0.15m, 0.1m},
-                new List<decimal>{0.25m, 0.65m, 0.4m},
-                new List<decimal>{0.1m,  0.2m,  0.5m},
-            };
             //List<List<decimal>> mchain = new List<List<decimal>>
             //{
-            //    new List<decimal>{0m, 2/5m, 1/3m, 0m},
-            //    new List<decimal>{2/3m, 0m, 1/3m, 2/3m},
-            //    new List<decimal>{1/3m, 1/5m, 0m, 1/3m},
-            //    new List<decimal>{0m, 2/5m, 1/3m, 0m},
+            //    new List<decimal>{0.65m, 0.15m, 0.1m},
+            //    new List<decimal>{0.25m, 0.65m, 0.4m},
+            //    new List<decimal>{0.1m,  0.2m,  0.5m},
             //};
+            List<List<decimal>> mchain = new List<List<decimal>>
+            {
+                new List<decimal>{0m, 2/5m, 1/3m, 0m},
+                new List<decimal>{2/3m, 0m, 1/3m, 2/3m},
+                new List<decimal>{1/3m, 1/5m, 0m, 1/3m},
+                new List<decimal>{0m, 2/5m, 1/3m, 0m},
+            };
 
             MarkovChain markovChain = new MarkovChain(mchain);
             Console.WriteLine(markovChain.findSteadyStates());
@@ -107,9 +107,9 @@ namespace MarkovChains
                     {
                         writeToTex($"Substitute {steadyStateEquations[i].Equivalent} into {steadyStateEquations[j].Equivalent}\n");
                         steadyStateEquations[j].substituteEquation(steadyStateEquations[i]);
+                        writeToTex("");
                     }
-
-            writeToTex("");
+            
             writeEquations();
 
             SubstituteIntoOne();
@@ -205,8 +205,10 @@ namespace MarkovChains
                         SubstituteValue(i, subEquation);
                         writeToTex(ToString());
                     }
-                        
-                solve();
+
+                Consolidate();
+                //if (Equivalent.Value != 1)
+                    solve();
             }
 
             private void SubstituteValue(int oldSteadyStateValueIndex, SteadyStateEquation SubEquation)
@@ -219,11 +221,9 @@ namespace MarkovChains
                 SteadyStateValues.RemoveAt(oldSteadyStateValueIndex);
             }
 
-            public void solve()
+            public void solve(bool fromSubstituteEquation = true)
             {
-                Consolidate();
                 bool needsSolving = false;
-
                 //step 1: take relevant value out
                 for (int i = SteadyStateValues.Count - 1; i >= 0; i--)
                     if (SteadyStateValues[i].K.Equals(Equivalent.K))
@@ -233,9 +233,10 @@ namespace MarkovChains
                         needsSolving = true;
                         break;
                     } //NOTE: not entirely necessary unless showing working is required
-
-                if (!needsSolving)
+                
+                if (!needsSolving || Equivalent.Value == 1)
                     return;
+                    
 
                 writeToTex(ToString());
 
@@ -255,7 +256,6 @@ namespace MarkovChains
                 writeToTex(equationString);
                 
                 writeToTex(ToString());
-                writeToTex("");
             }
 
             public void Consolidate() //there is probably a better way to do this

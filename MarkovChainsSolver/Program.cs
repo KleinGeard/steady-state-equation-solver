@@ -10,6 +10,7 @@ namespace MarkovChains
 {
     class Program
     {
+
         static void Main(string[] args)
         {
             //List<List<decimal>> mchain = new List<List<decimal>>
@@ -33,7 +34,7 @@ namespace MarkovChains
             };
 
             MarkovChain markovChain = new MarkovChain(mchain);
-            markovChain.SolveSteadyStates();
+            Console.WriteLine(markovChain.findSteadyStates());
 
             Console.ReadLine();
         }
@@ -45,12 +46,31 @@ namespace MarkovChains
         private List<string> names;
         private List<SteadyStateEquation> steadyStateEquations; //TODO: Make this a hashtable with the equiv values as keys
         private List<SolvedSteadyStateValue> solvedSteadyStateValues;
+        private static StringBuilder texString;
+        private static bool logging = false;
 
         public MarkovChain(List<List<decimal>> markovChain)
         {
             this.markovChain = markovChain;
             GenerateEquations();
             solvedSteadyStateValues = new List<SolvedSteadyStateValue>();
+            InitialiseTexString();
+        }
+
+        private void InitialiseTexString()
+        {
+            texString = new StringBuilder();
+            //    string starString = "";
+            //    for (int i = 0; i < steadyStateEquations.Count - 1; i++)
+            //    {
+            //        texString.AppendLine(steadyStateEquations[i] + $"      ({i+1})");
+            //        starString += $"{steadyStateEquations[i].Equivalent} + ";
+            //    }
+
+            //    texString.AppendLine(steadyStateEquations.Last() + $"      ({steadyStateEquations.Count})");
+
+            //    starString += $"{steadyStateEquations.Last().Equivalent} = 1      (*)";
+            //    texString.AppendLine(starString);
         }
 
         private void GenerateEquations()
@@ -68,33 +88,57 @@ namespace MarkovChains
                 throw new Exception("Length of List 'names' does not match dimensions of markov chain");
         }
 
-        public void SolveSteadyStates()
+        private void writeEquations()
         {
-            steadyStateEquations.ForEach(Console.WriteLine);
-            Console.WriteLine();
+            steadyStateEquations.ForEach(s => texString.AppendLine(s.ToString()));
+            texString.AppendLine("");
+        }
+
+        private void writeSolvedValues()
+        {
+            solvedSteadyStateValues.ForEach(v => texString.AppendLine(v.ToString()));
+            texString.AppendLine("");
+        }
+
+        private static void writeToTex(string s)
+        {
+            if (logging)
+            {
+                texString.AppendLine(s);
+            }
+        }
+
+        public string findSteadyStates()
+        {
+            writeEquations();
 
             steadyStateEquations.ForEach(s => s.solve());
-            steadyStateEquations.ForEach(Console.WriteLine);
-            Console.WriteLine();
+
+            writeEquations();
 
             steadyStateEquations.First().SteadyStateValues.Clear();
             steadyStateEquations.First().SteadyStateValues.Add(new SteadyStateValue(steadyStateEquations.First().Equivalent.K, 1));
-            steadyStateEquations.ForEach(Console.WriteLine);
-            Console.WriteLine();
+
+            writeEquations();
+            logging = true;
 
             for (int i = 1; i < steadyStateEquations.Count; i++)
             {
                 for (int j = 1; j < steadyStateEquations.Count; j++)
-                                    if (i != j)
-                                        steadyStateEquations[j].substituteEquation(steadyStateEquations[i]);
-
-                steadyStateEquations.ForEach(Console.WriteLine);
-                Console.WriteLine();
+                {
+                    if (i != j)
+                    {
+                        writeToTex($"Substitute {steadyStateEquations[i].Equivalent} into {steadyStateEquations[j].Equivalent}\n");
+                        steadyStateEquations[j].substituteEquation(steadyStateEquations[i]);
+                    }
+                }
             }
             
             SubstituteIntoOne();
-            solvedSteadyStateValues.ForEach(Console.WriteLine);
-            Console.WriteLine();
+
+            writeSolvedValues();
+
+            return texString.ToString();
         }
 
         private void SubstituteIntoOne() //NOTE: This method assumes that all equations are solved in terms of π1
@@ -138,27 +182,49 @@ namespace MarkovChains
                 return equation;
             }
 
-            #region substitution_steps
-            public void substituteEquation(params SteadyStateEquation[] subEquations)
+            public string ValuesAsString()
             {
-                for (int i = SteadyStateValues.Count - 1; i >= 0; i--)
-                    foreach (SteadyStateEquation subEquation in subEquations)
-                        if (SteadyStateValues[i].K == (subEquation.Equivalent.K))
-                            SubstituteValue(i, subEquation);
-                solve();
+                string valueString = "(";
+
+                for (int i = 0; i < SteadyStateValues.Count - 1; i++)
+                    valueString += $"{SteadyStateValues[i]} + ";
+
+                valueString += $"{SteadyStateValues.Last()})";
+
+                return valueString;
             }
 
-            private void SubstituteValue(int oldSteadyStateValueIndex, SteadyStateEquation newSteadyStateValues)
+            #region substitution_steps
+            public void substituteEquation(SteadyStateEquation subEquation)
+            {
+                for (int i = SteadyStateValues.Count - 1; i >= 0; i--)
+                    if (SteadyStateValues[i].K == (subEquation.Equivalent.K))
+                    {
+                        writeToTex(ToString().Replace(SteadyStateValues[i].ToString(), Math.Round(SteadyStateValues[i].Value, 4) +  subEquation.ValuesAsString()));
+                        SubstituteValue(i, subEquation);
+                        writeToTex(ToString());
+                    }
+                        
+                    
+                solve();
+
+                writeToTex("");
+            }
+
+            private void SubstituteValue(int oldSteadyStateValueIndex, SteadyStateEquation SubEquation)
             {
                 decimal p = SteadyStateValues[oldSteadyStateValueIndex].Value;
-                foreach (SteadyStateValue newSteadyStateValue in newSteadyStateValues.SteadyStateValues)
+
+                foreach (SteadyStateValue newSteadyStateValue in SubEquation.SteadyStateValues)
                     SteadyStateValues.Add(new SteadyStateValue(newSteadyStateValue.K, newSteadyStateValue.Value * p));
+
                 SteadyStateValues.RemoveAt(oldSteadyStateValueIndex);
             }
 
             public void solve()
             {
                 Consolidate();
+
                 //step 1: take relevant value out
                 for (int i = SteadyStateValues.Count - 1; i >= 0; i--)
                     if (SteadyStateValues[i].K.Equals(Equivalent.K))
@@ -167,10 +233,12 @@ namespace MarkovChains
                         SteadyStateValues.RemoveAt(i);
                         break;
                     } //NOTE: not entirely necessary unless showing working is required
+                writeToTex(ToString());
 
                 //step 2: adjust such that the equiv = 1
                 SteadyStateValues.ForEach(s => s.Value /= Equivalent.Value);
                 Equivalent.Value = 1;
+                writeToTex(ToString());
             }
 
             public void Consolidate() //there is probably a better way to do this
@@ -187,6 +255,7 @@ namespace MarkovChains
                         }
 
                 removalIndices.ForEach(i => SteadyStateValues.RemoveAt(i));
+                writeToTex(ToString());
             }
             #endregion substitution_steps
 
@@ -205,7 +274,7 @@ namespace MarkovChains
 
             public override string ToString()
             {
-                return (Value == 1) ? $"π{K}" : $"{Math.Round(Value, 4)}π{K}";
+                return (Value == 1) ? $"p{K}" : $"{Math.Round(Value, 4)}π{K}";
             }
         }
 
@@ -215,26 +284,9 @@ namespace MarkovChains
             
             public override string ToString()
             {
-                return $"π{K} = {Math.Round(Value, 4)}";
+                return $"p{K} = {Math.Round(Value, 4)}";
             }
         }
 
     }
 }
-
-#region dump
-//for (int n = 0; n < steadyStateEquations[i].SteadyStateValues.Count; n++)
-//{
-//    if (!steadyStateEquations[i].SteadyStateValues[n].K.Equals("1"))
-//    {
-//        for (int j = 1; j < steadyStateEquations.Count; j++)
-//        {
-//            if (steadyStateEquations[j].Equivalent.K.Equals(steadyStateEquations[i].SteadyStateValues[n].K))
-//            {
-//                steadyStateEquations[i].substituteEquation(steadyStateEquations[j]);
-//                break;
-//            }
-//        }
-//    }
-//}
-#endregion dump

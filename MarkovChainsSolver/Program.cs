@@ -93,12 +93,10 @@ namespace MarkovChains
             writeEquations();
 
             steadyStateEquations.ForEach(s => s.solve());
-
             writeEquations();
 
             steadyStateEquations.First().SteadyStateValues.Clear();
             steadyStateEquations.First().SteadyStateValues.Add(new SteadyStateValue(steadyStateEquations.First().Equivalent.K, 1));
-
             writeEquations();
 
             for (int i = 1; i < steadyStateEquations.Count; i++)
@@ -109,11 +107,9 @@ namespace MarkovChains
                         steadyStateEquations[j].substituteEquation(steadyStateEquations[i]);
                         writeToTex("");
                     }
-            
             writeEquations();
 
             SubstituteIntoOne();
-            
             writeSolvedValues();
 
             return texString.ToString();
@@ -126,34 +122,45 @@ namespace MarkovChains
             string equation = "";
             for (int i = 0; i < steadyStateEquations.Count - 1; i++)
             {
-                sum += steadyStateEquations[i].SteadyStateValues.First().Value;
-                equation += $"{steadyStateEquations[i].SteadyStateValues.First()} + ";
+                SteadyStateValue subableValue = steadyStateEquations[i].SteadyStateValues.First();
+                sum += subableValue.Value;
+                equation += $"{subableValue} + ";
             }
-            sum += steadyStateEquations.Last().SteadyStateValues.First().Value;
 
-            equation += $"{steadyStateEquations.Last().SteadyStateValues.First()} = 1";
+            SteadyStateValue lastSubableValue = steadyStateEquations.Last().SteadyStateValues.First();
+            sum += lastSubableValue.Value;
+            equation += $"{lastSubableValue} = 1";
+            
             writeSubstituteIntoOneTex(sum, equation);
 
             adjustAll(1 / sum);
         }
 
-        private void writeSubstituteIntoOneTex(decimal sum, string equation) //TODO - imporve code - D.R.Y
+        private void writeSubstituteIntoOneTex(decimal sum, string equation)
         {
-            writeToTex($"Substitute p{steadyStateEquations.Last().SteadyStateValues.First().K} into 1");
+            string piName = steadyStateEquations.Last().SteadyStateValues.First().K;
+            decimal roundedSum = Math.Round(sum, 4);
+            
+            writeToTex($"Substitute p{piName} into 1");
             writeToTex("");
             writeToTex(equation);
-            writeToTex($"{Math.Round(sum, 4)}p{steadyStateEquations.Last().SteadyStateValues.First().K} = 1");
-            writeToTex($"1 % {Math.Round(sum, 4)}p{steadyStateEquations.Last().SteadyStateValues.First().K} = p{steadyStateEquations.Last().SteadyStateValues.First().K}");
-            writeToTex($"p{steadyStateEquations.Last().SteadyStateValues.First().K} = {Math.Round(1 / sum, 4)}");
+            writeToTex($"{roundedSum}p{piName} = 1");
+            writeToTex($"1 % {roundedSum}p{piName} = p{piName}");
+            writeToTex($"p{piName} = {Math.Round(1 / sum, 4)}");
             writeToTex("");
         }
 
-        private void adjustAll(decimal solvedValue) //TODO: Fix up - D.R.Y
+        private void adjustAll(decimal pi1Value) 
         {
             foreach (SteadyStateEquation equation in steadyStateEquations)
             {
-                writeToTex($"p{equation.Equivalent.K} = {Math.Round(equation.SteadyStateValues.First().Value, 4)} x {Math.Round(solvedValue, 4)} = {Math.Round(equation.SteadyStateValues.First().Value * solvedValue, 4)}");
-                solvedSteadyStateValues.Add(new SolvedSteadyStateValue(equation.Equivalent.K, equation.SteadyStateValues.First().Value * solvedValue));
+                decimal relativeValue = equation.SteadyStateValues.First().Value;
+                string piName = equation.Equivalent.K;
+
+                SolvedSteadyStateValue solvedSteadyStateValue = new SolvedSteadyStateValue(piName, relativeValue * pi1Value);
+                solvedSteadyStateValues.Add(solvedSteadyStateValue);
+
+                writeToTex($"p{piName} = {Math.Round(relativeValue, 4)} x {Math.Round(pi1Value, 4)} = {Math.Round(solvedSteadyStateValue.Value, 4)}");
             }
             writeToTex("");
         }

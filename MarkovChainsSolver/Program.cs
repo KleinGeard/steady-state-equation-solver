@@ -118,8 +118,8 @@ namespace MarkovChains
         private void SubstituteIntoOne() //NOTE: This method assumes that all equations are solved in terms of π1
         {
             decimal sum = 0;
-
             string equation = "";
+
             for (int i = 0; i < steadyStateEquations.Count - 1; i++)
             {
                 SteadyStateValue subableValue = steadyStateEquations[i].SteadyStateValues.First();
@@ -159,7 +159,7 @@ namespace MarkovChains
                 SolvedSteadyStateValue solvedSteadyStateValue = new SolvedSteadyStateValue(piName, relativeValue * pi1Value);
                 solvedSteadyStateValues.Add(solvedSteadyStateValue);
 
-                writeToTex($"p{piName} = {Math.Round(relativeValue, 4)} x {Math.Round(pi1Value, 4)} = {Math.Round(solvedSteadyStateValue.Value, 4)}");
+                writeToTex($"p{piName} = {Math.Round(relativeValue, 4)} x {Math.Round(pi1Value, 4)} = {solvedSteadyStateValue.getRoundedValue()}");
             }
             writeToTex("");
         }
@@ -207,7 +207,7 @@ namespace MarkovChains
                 for (int i = SteadyStateValues.Count - 1; i >= 0; i--)
                     if (SteadyStateValues[i].piName == (subEquation.Equivalent.piName))
                     {
-                        writeToTex(ToString().Replace(SteadyStateValues[i].ToString(), Math.Round(SteadyStateValues[i].Value, 4) +  subEquation.ValuesAsString()));
+                        writeToTex(ToString().Replace(SteadyStateValues[i].ToString(), SteadyStateValues[i].getRoundedValue() +  subEquation.ValuesAsString()));
                         SubstituteValue(i, subEquation);
                         writeToTex(ToString());
                     }
@@ -231,21 +231,20 @@ namespace MarkovChains
             public void solve(bool fromSubstituteEquation = true) //TODO: break up into multiple smaller methods
             {
                 bool needsSolving = false;
-                SolveStepTwo(ref needsSolving);
-
+                SolveStepOne(ref needsSolving);
                 if (!needsSolving || Equivalent.Value == 1)
                     return;
 
                 writeToTex(ToString());
 
                 string equationString = "";
-                solveStepTwo(ref equationString);
-
+                SolveStepTwo(ref equationString);
                 writeToTex(equationString);
+
                 writeToTex(ToString());
             }
             
-            private void SolveStepTwo(ref bool needsSolving) //NOTE: not entirely necessary unless showing working is required
+            private void SolveStepOne(ref bool needsSolving) //NOTE: not entirely necessary unless showing working is required
             {
                 //step 1: take relevant value out
                 for (int i = SteadyStateValues.Count - 1; i >= 0; i--)
@@ -258,7 +257,7 @@ namespace MarkovChains
                     } 
             }
 
-            private void solveStepTwo(ref string equationString)
+            private void SolveStepTwo(ref string equationString)
             {
                 //step 2: adjust such that the equiv = 1
                 for (int i = 0; i < SteadyStateValues.Count - 1; i++)
@@ -307,7 +306,7 @@ namespace MarkovChains
 
             public override string ToString()
             {
-                return (Value == 1) ? $"p{piName}" : $"{Math.Round(Value, 4)}π{piName}";
+                return (Value == 1) ? $"p{piName}" : $"{getRoundedValue()}π{piName}";
             }
 
             public decimal getRoundedValue()
@@ -322,7 +321,7 @@ namespace MarkovChains
             
             public override string ToString()
             {
-                return $"p{piName} = {Math.Round(Value, 4)}";
+                return $"p{piName} = {getRoundedValue()}";
             }
         }
 

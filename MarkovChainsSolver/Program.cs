@@ -19,19 +19,19 @@ namespace MarkovChains
             //    new List<decimal>{0.25m, 2/3m, 0.25m},
             //    new List<decimal>{0m,  1/3m,  0.5m},
             //};
-            //List<List<decimal>> mchain = new List<List<decimal>>
-            //{
-            //    new List<decimal>{0.65m, 0.15m, 0.1m},
-            //    new List<decimal>{0.25m, 0.65m, 0.4m},
-            //    new List<decimal>{0.1m,  0.2m,  0.5m},
-            //};
             List<List<decimal>> mchain = new List<List<decimal>>
             {
-                new List<decimal>{0m, 2/5m, 1/3m, 0m},
-                new List<decimal>{2/3m, 0m, 1/3m, 2/3m},
-                new List<decimal>{1/3m, 1/5m, 0m, 1/3m},
-                new List<decimal>{0m, 2/5m, 1/3m, 0m},
+                new List<decimal>{0.65m, 0.15m, 0.1m},
+                new List<decimal>{0.25m, 0.65m, 0.4m},
+                new List<decimal>{0.1m,  0.2m,  0.5m},
             };
+            //List<List<decimal>> mchain = new List<List<decimal>>
+            //{
+            //    new List<decimal>{0m, 2/5m, 1/3m, 0m},
+            //    new List<decimal>{2/3m, 0m, 1/3m, 2/3m},
+            //    new List<decimal>{1/3m, 1/5m, 0m, 1/3m},
+            //    new List<decimal>{0m, 2/5m, 1/3m, 0m},
+            //};
 
             MarkovChain markovChain = new MarkovChain(mchain);
             Console.WriteLine(markovChain.findSteadyStates());
@@ -96,7 +96,7 @@ namespace MarkovChains
             writeEquations();
 
             steadyStateEquations.First().SteadyStateValues.Clear();
-            steadyStateEquations.First().SteadyStateValues.Add(new SteadyStateValue(steadyStateEquations.First().Equivalent.piName, 1));
+            steadyStateEquations.First().SteadyStateValues.Add(new SteadyStateValue(steadyStateEquations.First().Equivalent.PiName, 1));
             writeEquations();
 
             for (int i = 1; i < steadyStateEquations.Count; i++)
@@ -105,7 +105,6 @@ namespace MarkovChains
                     {
                         writeToTex($"Substitute {steadyStateEquations[i].Equivalent} into {steadyStateEquations[j].Equivalent}\n");
                         steadyStateEquations[j].substituteEquation(steadyStateEquations[i]);
-                        writeToTex("");
                     }
             writeEquations();
 
@@ -137,7 +136,7 @@ namespace MarkovChains
 
         private void writeSubstituteIntoOneTex(decimal sum, string equation)
         {
-            string piName = steadyStateEquations.Last().SteadyStateValues.First().piName;
+            string piName = steadyStateEquations.Last().SteadyStateValues.First().PiName;
             decimal roundedSum = Math.Round(sum, 4);
             
             writeToTex($"Substitute p{piName} into 1");
@@ -154,7 +153,7 @@ namespace MarkovChains
             foreach (SteadyStateEquation equation in steadyStateEquations)
             {
                 decimal relativeValue = equation.SteadyStateValues.First().Value;
-                string piName = equation.Equivalent.piName;
+                string piName = equation.Equivalent.PiName;
 
                 SolvedSteadyStateValue solvedSteadyStateValue = new SolvedSteadyStateValue(piName, relativeValue * pi1Value);
                 solvedSteadyStateValues.Add(solvedSteadyStateValue);
@@ -205,7 +204,7 @@ namespace MarkovChains
             public void substituteEquation(SteadyStateEquation subEquation)
             {
                 for (int i = SteadyStateValues.Count - 1; i >= 0; i--)
-                    if (SteadyStateValues[i].piName == (subEquation.Equivalent.piName))
+                    if (SteadyStateValues[i].PiName == (subEquation.Equivalent.PiName))
                     {
                         writeToTex(ToString().Replace(SteadyStateValues[i].ToString(), SteadyStateValues[i].getRoundedValue() +  subEquation.ValuesAsString()));
                         SubstituteValue(i, subEquation);
@@ -213,8 +212,7 @@ namespace MarkovChains
                     }
 
                 Consolidate();
-                //if (Equivalent.Value != 1)
-                    solve();
+                solve();
             }
 
             private void SubstituteValue(int oldSteadyStateValueIndex, SteadyStateEquation SubEquation)
@@ -222,7 +220,7 @@ namespace MarkovChains
                 decimal p = SteadyStateValues[oldSteadyStateValueIndex].Value;
 
                 foreach (SteadyStateValue newSteadyStateValue in SubEquation.SteadyStateValues)
-                    SteadyStateValues.Add(new SteadyStateValue(newSteadyStateValue.piName, newSteadyStateValue.Value * p));
+                    SteadyStateValues.Add(new SteadyStateValue(newSteadyStateValue.PiName, newSteadyStateValue.Value * p));
 
                 SteadyStateValues.RemoveAt(oldSteadyStateValueIndex);
             }
@@ -233,8 +231,11 @@ namespace MarkovChains
                 bool needsSolving = false;
                 SolveStepOne(ref needsSolving);
                 if (!needsSolving || Equivalent.Value == 1)
+                {
+                    writeToTex("");
                     return;
-
+                }
+                    
                 writeToTex(ToString());
 
                 string equationString = "";
@@ -242,13 +243,14 @@ namespace MarkovChains
                 writeToTex(equationString);
 
                 writeToTex(ToString());
+                writeToTex("");
             }
             
             private void SolveStepOne(ref bool needsSolving) //NOTE: not entirely necessary unless showing working is required
             {
                 //step 1: take relevant value out
                 for (int i = SteadyStateValues.Count - 1; i >= 0; i--)
-                    if (SteadyStateValues[i].piName.Equals(Equivalent.piName))
+                    if (SteadyStateValues[i].PiName.Equals(Equivalent.PiName))
                     {
                         Equivalent.Value = 1 - SteadyStateValues[i].Value;
                         SteadyStateValues.RemoveAt(i);
@@ -265,7 +267,7 @@ namespace MarkovChains
                     equationString += $"({SteadyStateValues[i]} / {Equivalent.getRoundedValue()}) + ";
                     SteadyStateValues[i].Value /= Equivalent.Value;
                 }
-                equationString += $"({SteadyStateValues.Last()} / {Equivalent.getRoundedValue()}) = p{Equivalent.piName}";
+                equationString += $"({SteadyStateValues.Last()} / {Equivalent.getRoundedValue()}) = p{Equivalent.PiName}";
                 SteadyStateValues.Last().Value /= Equivalent.Value;
 
                 Equivalent.Value = 1;
@@ -278,7 +280,7 @@ namespace MarkovChains
 
                 for (int i = SteadyStateValues.Count - 1; i >= 0; i--)
                     for (int j = SteadyStateValues.Count - 1; j >= 0; j--)
-                        if (i != j && SteadyStateValues[i].piName.Equals(SteadyStateValues[j].piName) && !removalIndices.Contains(j))
+                        if (i != j && SteadyStateValues[i].PiName.Equals(SteadyStateValues[j].PiName) && !removalIndices.Contains(j))
                         {
                             decimal p = SteadyStateValues[i].Value;
                             removalIndices.Add(i);
@@ -295,18 +297,18 @@ namespace MarkovChains
 
         private class SteadyStateValue
         {
-            public string piName { get; set; }
+            public string PiName { get; set; }
             public decimal Value { get; set; }
 
-            public SteadyStateValue(string k, decimal value)
+            public SteadyStateValue(string piName, decimal value)
             {
-                piName = k;
+                PiName = piName;
                 Value = value;
             }
 
             public override string ToString()
             {
-                return (Value == 1) ? $"p{piName}" : $"{getRoundedValue()}π{piName}";
+                return (Value == 1) ? $"p{PiName}" : $"{getRoundedValue()}π{PiName}";
             }
 
             public decimal getRoundedValue()
@@ -321,7 +323,7 @@ namespace MarkovChains
             
             public override string ToString()
             {
-                return $"p{piName} = {getRoundedValue()}";
+                return $"p{PiName} = {getRoundedValue()}";
             }
         }
 

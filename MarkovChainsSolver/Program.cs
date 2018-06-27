@@ -90,22 +90,29 @@ namespace MarkovChains
 
         public string findSteadyStates() //TODO: break up into multiple smaller methods
         {
+            writeToTex("The initial equations are as such:");
             writeEquations();
 
+            writeToTex("Remove pk from the equations");
             steadyStateEquations.ForEach(s => s.solve());
+            writeToTex("The resulting equations are as such:");
             writeEquations();
 
-            steadyStateEquations.First().SteadyStateValues.Clear();
-            steadyStateEquations.First().SteadyStateValues.Add(new SteadyStateValue(steadyStateEquations.First().Equivalent.PiName, 1));
+            SteadyStateEquation firstEquation = steadyStateEquations.First();
+            firstEquation.SteadyStateValues.Clear(); //TODO: D.R.Y
+            firstEquation.SteadyStateValues.Add(new SteadyStateValue(steadyStateEquations.First().Equivalent.PiName, 1));
+            writeToTex($"It is known that {firstEquation.Equivalent} = {firstEquation.Equivalent}, so this can be solved straight away");
             writeEquations();
 
             for (int i = 1; i < steadyStateEquations.Count; i++)
                 for (int j = 1; j < steadyStateEquations.Count; j++)
                     if (i != j)
                     {
-                        writeToTex($"Substitute {steadyStateEquations[i].Equivalent} into {steadyStateEquations[j].Equivalent}\n");
+                        writeToTex($"Substitute {steadyStateEquations[i].Equivalent} into {steadyStateEquations[j].Equivalent}");
                         steadyStateEquations[j].substituteEquation(steadyStateEquations[i]);
                     }
+
+            writeToTex($"The steady state values in terms of {firstEquation.Equivalent} are as such:");
             writeEquations();
 
             SubstituteIntoOne();
@@ -140,10 +147,10 @@ namespace MarkovChains
             decimal roundedSum = Math.Round(sum, 4);
             
             writeToTex($"Substitute p{piName} into 1");
-            writeToTex("");
+            //writeToTex("");
             writeToTex(equation);
             writeToTex($"{roundedSum}p{piName} = 1");
-            writeToTex($"1 % {roundedSum}p{piName} = p{piName}");
+            writeToTex($"1 / {roundedSum}p{piName} = p{piName}");
             writeToTex($"p{piName} = {Math.Round(1 / sum, 4)}");
             writeToTex("");
         }

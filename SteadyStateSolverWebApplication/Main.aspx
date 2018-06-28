@@ -1,7 +1,5 @@
 ﻿<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="Main.aspx.cs" Inherits="SteadyStateSolverWebApplication.Main" %>
-
 <!DOCTYPE html>
-
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head runat="server">
     <title>Steady State Solver</title>
@@ -17,8 +15,6 @@
 <body>
     <form id="form1" runat="server">
         <div>
-            
-
             <table>
                 <tr>
                     <td style="padding-top:0px;padding-left:20px; " class="auto-style1">
@@ -34,7 +30,6 @@
                             <h3>P =</h3>
                         </td>
                         <td align="left">
-
                                 <div ID="divTransitionMatrix" runat="server" />
                         </td>
                     </tr>
@@ -47,9 +42,7 @@
                     </td>
                 </tr>
             </table>
-
             <asp:Label ID="lblMatrixInputError" runat="server" ForeColor="Red"></asp:Label>
-
         </div>
         <asp:Label ID="lblEquations" runat="server" Text="" allign="right"></asp:Label>
     </form>

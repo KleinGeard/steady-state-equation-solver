@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Web;
 using System.Web.UI;
@@ -63,7 +64,9 @@ namespace SteadyStateSolverWebApplication
                         Height = 32,
                     };
                     txt.Text = Request.Form.GetValues($"x{i}y{j}")[0];
-                    row.Add(Convert.ToDecimal(txt.Text));
+                    DataTable dt = new DataTable(); //TODO: Make safe
+                    var d = dt.Compute(txt.Text, "");
+                    row.Add(Convert.ToDecimal(d));
                     divTransitionMatrix.Controls.Add(txt);
                 }
                 transitionMatrix.Add(row);

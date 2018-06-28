@@ -115,10 +115,18 @@ namespace SteadyStateSolverWebApplication
 
             if (isValidInput)
             {
-                MarkovChain markovChain = new MarkovChain(transitionMatrix);
-                string tex = markovChain.findSteadyStates();
-                lblEquations.Text = tex;
-                //hiddenInput.Value = tex;
+                try
+                {
+                    MarkovChain markovChain = new MarkovChain(transitionMatrix);
+                    string tex = markovChain.findSteadyStates();
+                    lblEquations.Text = tex;
+                    hiddenInput.Value = tex;
+                } catch //TODO: Find a better way to do this
+                { 
+                    lblMatrixInputError.Text = "Every state in the Markov Chain must be reachable";
+                    lblEquations.Text = "";
+                }
+                
             }
                 
         }

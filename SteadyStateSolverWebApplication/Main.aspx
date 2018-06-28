@@ -11,7 +11,7 @@
           var copyText = document.getElementById("hiddenInput");
           copyText.select();
           document.execCommand("copy");
-          alert("Copied the text: " + copyText.value);
+          alert("TeX code copied to clipboard");
         }
     </script>
     <style type="text/css">
@@ -23,12 +23,8 @@
         }
         .hidden
         {
-            display:none;
-            visibility:hidden;
-        }
-        .auto-style2 {
-            width: 0px;
-            height: 2px;
+            position: absolute;
+            left: -9999px;
         }
     </style>
 </head>
@@ -70,7 +66,7 @@
             <asp:Label ID="lblMatrixInputError" runat="server" ForeColor="Red"></asp:Label></div>
         <asp:Label ID="lblEquations" runat="server" Text="" allign="right"></asp:Label>
     </form>
-    <button id="btnCopyTex" onclick="copyTeX">TeX</button>
-    <input type="text" value="" id="hiddenInput" runat="server" class="auto-style2"/>
+    <button id="btnCopyTex" onclick="copyTeX()">TeX</button>
+    <input type="text" value="3223" runat="server" id="hiddenInput" class="hidden"/>
 </body>
 </html>

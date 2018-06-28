@@ -21,6 +21,7 @@ namespace SteadyStateSolverWebApplication
             {
                 lblMatrixInputError.Text = "";
                 lblDimensionsInputError.Text = "";
+                btnCopyTex.Visible = false;
             }
         }
         
@@ -121,9 +122,11 @@ namespace SteadyStateSolverWebApplication
                     string tex = markovChain.findSteadyStates();
                     lblEquations.Text = tex;
                     hiddenInput.Value = tex;
-                } catch //TODO: Find a better way to do this
+                    btnCopyTex.Visible = true;
+                } catch //TODO: Handle exceptions in a single method
                 { 
                     lblMatrixInputError.Text = "Every state in the Markov Chain must be reachable";
+                    btnCopyTex.Visible = false;
                     lblEquations.Text = "";
                 }
                 
@@ -141,6 +144,7 @@ namespace SteadyStateSolverWebApplication
                     if ( value < 0)
                     {
                         lblMatrixInputError.Text = "All values in the matrix put be non-negative";
+                        btnCopyTex.Visible = false;
                         lblEquations.Text = "";
                         return false;
                     } else
@@ -151,6 +155,7 @@ namespace SteadyStateSolverWebApplication
                 if (rowsum <= 0.995m || rowsum >= 1.005m)
                 {
                     lblMatrixInputError.Text = "All rows in the transition matrix must sum to 1";
+                    btnCopyTex.Visible = false;
                     lblEquations.Text = "";
                     return false;
                 }

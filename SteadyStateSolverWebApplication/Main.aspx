@@ -19,6 +19,7 @@
     </style>
 </head>
 <body>
+    <h3>Markov Chain Steady State Solver</h3>
     <p>Created by Klein Geard </p>
     <a href="https://github.com/KleinGeard/steady-state-equation-solver">
         <img id="imgGithubLink" src="githubicon.png" width="50" height="50" class="githublink" />

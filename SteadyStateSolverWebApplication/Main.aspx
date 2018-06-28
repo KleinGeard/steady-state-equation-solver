@@ -6,15 +6,29 @@
     <script type="text/javascript" async
         src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-MML-AM_CHTML" async>
     </script>
+    <script>
+        function copyTeX() {
+          var copyText = document.getElementById("hiddenInput");
+          copyText.select();
+          document.execCommand("copy");
+          alert("Copied the text: " + copyText.value);
+        }
+    </script>
     <style type="text/css">
         .auto-style1 {
             width: 850px;
         }
-        .auto-style3 {
-            width: 118px;
-        }
         .githublink:hover {
             background-color: lightgray;
+        }
+        .hidden
+        {
+            display:none;
+            visibility:hidden;
+        }
+        .auto-style2 {
+            width: 0px;
+            height: 2px;
         }
     </style>
 </head>
@@ -56,5 +70,7 @@
             <asp:Label ID="lblMatrixInputError" runat="server" ForeColor="Red"></asp:Label></div>
         <asp:Label ID="lblEquations" runat="server" Text="" allign="right"></asp:Label>
     </form>
+    <button id="btnCopyTex" onclick="copyTeX">TeX</button>
+    <input type="text" value="" id="hiddenInput" runat="server" class="auto-style2"/>
 </body>
 </html>

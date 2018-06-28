@@ -116,7 +116,9 @@ namespace SteadyStateSolverWebApplication
             if (isValidInput)
             {
                 MarkovChain markovChain = new MarkovChain(transitionMatrix);
-                lblEquations.Text = markovChain.findSteadyStates();
+                string tex = markovChain.findSteadyStates();
+                lblEquations.Text = tex;
+                //hiddenInput.Value = tex;
             }
                 
         }

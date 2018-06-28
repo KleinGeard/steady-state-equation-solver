@@ -135,7 +135,7 @@ namespace SteadyStateSolverWebApplication
 
         private void adjustAll(decimal pi1Value)
         {
-            writeEquationToTex("Solve remaining steady state values");
+            writeToTex("Solve remaining steady state values");
             
             foreach (SteadyStateEquation equation in steadyStateEquations)
             {

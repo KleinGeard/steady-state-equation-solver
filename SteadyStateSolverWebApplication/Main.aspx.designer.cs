@@ -22,6 +22,15 @@ namespace SteadyStateSolverWebApplication {
         protected global::System.Web.UI.HtmlControls.HtmlForm form1;
         
         /// <summary>
+        /// lblEnterMatrixDimensions control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblEnterMatrixDimensions;
+        
+        /// <summary>
         /// txtMatrixDim control.
         /// </summary>
         /// <remarks>
@@ -40,6 +49,15 @@ namespace SteadyStateSolverWebApplication {
         protected global::System.Web.UI.WebControls.Button btnSubmitDim;
         
         /// <summary>
+        /// lblDimensionsInputError control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblDimensionsInputError;
+        
+        /// <summary>
         /// divTransitionMatrix control.
         /// </summary>
         /// <remarks>
@@ -56,6 +74,15 @@ namespace SteadyStateSolverWebApplication {
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Button btnCalc;
+        
+        /// <summary>
+        /// lblMatrixInputError control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblMatrixInputError;
         
         /// <summary>
         /// lblEquations control.

@@ -8,6 +8,11 @@
     <script type="text/javascript" async
         src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.4/MathJax.js?config=TeX-MML-AM_CHTML" async>
     </script>
+    <style type="text/css">
+        .auto-style1 {
+            width: 850px;
+        }
+    </style>
 </head>
 <body>
     <form id="form1" runat="server">
@@ -16,11 +21,11 @@
 
             <table>
                 <tr>
-                    <td style="padding-top:0px;padding-left:20px; width: 320px;" class="modal-sm">
-                        <h3>Matrix Dimensions</h3>
-                        <p>Please enter a valid number between 2 and 10:</p>
+                    <td style="padding-top:0px;padding-left:20px; " class="auto-style1">
+                        <asp:Label ID="lblEnterMatrixDimensions" runat="server" Text="Matrix Dimensions: "></asp:Label>
                         <asp:TextBox TextMode="Number" MaxLength="2" runat="server" ID="txtMatrixDim" Text="3" Width="42px"></asp:TextBox>
                         <asp:Button ID="btnSubmitDim" Text="Update" runat="server" OnClick="btnSubmitDim_Click" />
+                        <asp:Label ID="lblDimensionsInputError" runat="server" ForeColor="Red"></asp:Label>
                     </td>
                 </tr>
                 <table>
@@ -43,8 +48,10 @@
                 </tr>
             </table>
 
+            <asp:Label ID="lblMatrixInputError" runat="server" ForeColor="Red"></asp:Label>
+
         </div>
-        <asp:Label ID="lblEquations" runat="server" Text="line one \\ line two" allign="right"></asp:Label>
+        <asp:Label ID="lblEquations" runat="server" Text="" allign="right"></asp:Label>
     </form>
 </body>
 </html>

@@ -76,7 +76,7 @@ namespace SteadyStateSolverWebApplication
             writeToTex("The initial equations are as such:");
             writeEquations();
 
-            writeToTex("Remove pk from the equations");
+            writeToTex("Remove \\(\\pi_k\\) from the equations");
             toggleMathMode();
             steadyStateEquations.ForEach(s => s.solve());
             toggleMathMode();

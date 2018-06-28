@@ -19,7 +19,8 @@ namespace SteadyStateSolverWebApplication
                 createTransitionMatrix(3);
             } else
             {
-                
+                lblMatrixInputError.Text = "";
+                lblDimensionsInputError.Text = "";
             }
         }
         
@@ -42,7 +43,7 @@ namespace SteadyStateSolverWebApplication
             }
         }
 
-        private void retainDynamicControls()
+        private void retainDynamicControls(ref bool isValidInput)
         {
             string[] keys = Request.Form.AllKeys;
             int dimensions = 0;
@@ -63,41 +64,89 @@ namespace SteadyStateSolverWebApplication
                         Width = 48,
                         Height = 32,
                     };
-                    txt.Text = Request.Form.GetValues($"x{i}y{j}")[0];
-                    DataTable dt = new DataTable(); //TODO: Make safe
-                    var d = dt.Compute(txt.Text, "");
-                    row.Add(Convert.ToDecimal(d));
+
+                    try
+                    {
+                        txt.Text = Request.Form.GetValues($"x{i}y{j}")[0];
+                        DataTable dt = new DataTable(); //TODO: Make safe
+                        var d = dt.Compute(txt.Text, "");
+                        row.Add(Convert.ToDecimal(d));
+                    } catch
+                    {
+                        isValidInput = false;
+                        lblMatrixInputError.Text = "Matrix values must be valid decimals or fractions";
+                    }
+                    
                     divTransitionMatrix.Controls.Add(txt);
                 }
                 transitionMatrix.Add(row);
                 divTransitionMatrix.Controls.Add(new LiteralControl("<br/>"));
             }
+            if (!isValidInput) return;
 
+            isValidInput = isValidMatrix();
         }
 
         protected void btnSubmitDim_Click(object sender, EventArgs e)
         {
             try
             {
-                createTransitionMatrix(Convert.ToInt32(txtMatrixDim.Text));
+
+                int newDimensions = Convert.ToInt32(txtMatrixDim.Text);
+                if (newDimensions > 1 && newDimensions < 16)
+                {
+                    createTransitionMatrix(newDimensions);
+                    lblEquations.Text = "";
+                } else
+                {
+                    lblDimensionsInputError.Text = "Please enter a number between 2 and 15";
+                }
             } catch
             {
-                //Message: Please enter a valid input
+                //Message: Please enter a valid input - likely not needed
             }
             
         }
-
-
-
+        
         protected void btnCalc_Click(object sender, EventArgs e)
         {
-            retainDynamicControls();
+            bool isValidInput = true;
+            retainDynamicControls(ref isValidInput);
 
-            MarkovChain markovChain = new MarkovChain(transitionMatrix);
-            lblEquations.Text = markovChain.findSteadyStates();
+            if (isValidInput)
+            {
+                MarkovChain markovChain = new MarkovChain(transitionMatrix);
+                lblEquations.Text = markovChain.findSteadyStates();
+            }
+                
         }
 
-
+        private bool isValidMatrix()
+        {
+            foreach (List<decimal> row in transitionMatrix)
+            {
+                decimal rowsum = 0;
+                foreach(decimal value in row)
+                {
+                    if ( value < 0)
+                    {
+                        lblMatrixInputError.Text = "All values in the matrix put be non-negative";
+                        lblEquations.Text = "";
+                        return false;
+                    } else
+                    {
+                        rowsum += value;
+                    }
+                }
+                if (rowsum <= 0.995m || rowsum >= 1.005m)
+                {
+                    lblMatrixInputError.Text = "All rows in the transition matrix must sum to 1";
+                    lblEquations.Text = "";
+                    return false;
+                }
+            }
+            return true;
+        }
 
     }
 }

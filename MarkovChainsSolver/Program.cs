@@ -32,11 +32,13 @@ namespace MarkovChains
         private List<List<decimal>> markovChain;
         private List<string> names;
         private List<SteadyStateEquation> steadyStateEquations;
+        private List<SteadyStateValue> solvedSteadyStateValues;
 
         public MarkovChain(List<List<decimal>> markovChain)
         {
             this.markovChain = markovChain;
             GenerateEquations();
+            solvedSteadyStateValues = new List<SteadyStateValue>();
         }
 
         private void GenerateEquations()
@@ -63,6 +65,32 @@ namespace MarkovChains
             steadyStateEquations[1].substituteEquation(steadyStateEquations[2]);
             steadyStateEquations[2].substituteEquation(steadyStateEquations[0]);
             steadyStateEquations.ForEach(Console.WriteLine);
+            //what is the next step
+            //solve all in terms of p1...
+            //focus on the steps require to get it done first...
+            //focus on automating it later...
+            steadyStateEquations[2].substituteEquation(steadyStateEquations[1]);//TODO: figuring out when to do this must be automated
+            steadyStateEquations.ForEach(Console.WriteLine);
+            //now solve into one
+        }
+
+        private void SubstituteIntoStar() //NOTE: This method assumes that all equations are solved in terms of π1
+        {
+            //UNDONE: step 1: validate readiness 
+
+            //step 2: sub into (*)
+            decimal sum = 1;
+            foreach (SteadyStateEquation s in steadyStateEquations)
+            {
+                if (steadyStateEquations.Count != 0 /*|| !s.SteadyStateValues[0].K.Equals("1")*/) //NOTE: second arg not need unless I decide to use a different technique
+                    throw new Exception("Cannot substitute into (*): equations are not subsequently solved yet");
+
+                if (s.Equivalent.K.Equals("1"))
+                {
+                    sum += s.SteadyStateValues[0].Value;
+                }
+            }
+
         }
 
         private class SteadyStateEquation
@@ -90,6 +118,7 @@ namespace MarkovChains
                 return equation;
             }
 
+            #region substitution_steps
             public void substituteEquation(params SteadyStateEquation[] subEquations)
             {
                 for (int i = SteadyStateValues.Count-1; i >= 0; i--)
@@ -117,13 +146,11 @@ namespace MarkovChains
                         Equivalent.Value = 1 - SteadyStateValues[i].Value;
                         SteadyStateValues.RemoveAt(i);
                         break;
-                    } // not entirely necessary unless showing working is required
+                    } //NOTE: not entirely necessary unless showing working is required
 
                 //step 2: adjust such that the equiv = 1
                 SteadyStateValues.ForEach(s => s.Value /= Equivalent.Value);
                 Equivalent.Value = 1;
-
-
             }
 
             public void Consolidate() //there is probably a better way to do this
@@ -141,6 +168,7 @@ namespace MarkovChains
 
                 removalIndices.ForEach(i => SteadyStateValues.RemoveAt(i));
             }
+            #endregion substitution_steps
 
         }
 

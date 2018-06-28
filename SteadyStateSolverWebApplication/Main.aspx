@@ -10,9 +10,19 @@
         .auto-style1 {
             width: 850px;
         }
+        .auto-style3 {
+            width: 118px;
+        }
+        .githublink:hover {
+            background-color: lightgray;
+        }
     </style>
 </head>
 <body>
+    <p>Created by Klein Geard </p>
+    <a href="https://github.com/KleinGeard/steady-state-equation-solver">
+        <img id="imgGithubLink" src="githubicon.png" width="50" height="50" class="githublink" />
+    </a>
     <form id="form1" runat="server">
         <div>
             <table>
@@ -42,8 +52,7 @@
                     </td>
                 </tr>
             </table>
-            <asp:Label ID="lblMatrixInputError" runat="server" ForeColor="Red"></asp:Label>
-        </div>
+            <asp:Label ID="lblMatrixInputError" runat="server" ForeColor="Red"></asp:Label></div>
         <asp:Label ID="lblEquations" runat="server" Text="" allign="right"></asp:Label>
     </form>
 </body>

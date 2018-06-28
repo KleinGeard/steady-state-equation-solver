@@ -47,18 +47,18 @@ namespace SteadyStateSolverWebApplication
 
         private void writeEquations()
         {
-            toggleMathMode();
-            steadyStateEquations.ForEach(s => texString.AppendLine(s.ToString() + "\\\\"));
-            toggleMathMode();
-            texString.AppendLine("");
+            //toggleMathMode();
+            steadyStateEquations.ForEach(s => texString.AppendLine($"$${s.ToString()}$$"));
+            //toggleMathMode();
+            //texString.AppendLine("");
         }
 
         private void writeSolvedValues()
         {
-            toggleMathMode();
-            solvedSteadyStateValues.ForEach(v => texString.AppendLine(v.ToString() + "\\\\"));
-            toggleMathMode();
-            texString.AppendLine("");
+            //toggleMathMode();
+            solvedSteadyStateValues.ForEach(v => texString.AppendLine($"$${v.ToString()}$$"));
+            //toggleMathMode();
+            //texString.AppendLine("");
         }
 
         private static void writeToTex(string s)
@@ -68,7 +68,7 @@ namespace SteadyStateSolverWebApplication
 
         private static void toggleMathMode()
         {
-            texString.Append("$$");
+            //texString.Append("$$");
         }
 
         public string findSteadyStates() //TODO: break up into multiple smaller methods
@@ -76,7 +76,7 @@ namespace SteadyStateSolverWebApplication
             writeToTex("The initial equations are as such:");
             writeEquations();
 
-            writeToTex("Remove \\(\\pi_k\\) from the equations");
+            writeToTex("Remove \\(\\pi_k\\) from the equations. ");
             toggleMathMode();
             steadyStateEquations.ForEach(s => s.solve());
             toggleMathMode();
@@ -86,14 +86,14 @@ namespace SteadyStateSolverWebApplication
             SteadyStateEquation firstEquation = steadyStateEquations.First();
             firstEquation.SteadyStateValues.Clear(); //TODO: D.R.Y
             firstEquation.SteadyStateValues.Add(new SteadyStateValue(steadyStateEquations.First().Equivalent.PiName, 1));
-            writeToTex($"It is known that \\({firstEquation.Equivalent} = {firstEquation.Equivalent}\\), so this can be solved straight away");
+            writeToTex($"It is known that \\({firstEquation.Equivalent} = {firstEquation.Equivalent}\\), so this can be solved straight away.");
             writeEquations();
 
             for (int i = 1; i < steadyStateEquations.Count; i++)
                 for (int j = 1; j < steadyStateEquations.Count; j++)
                     if (i != j)
                     {
-                        writeToTex($"Substitute \\({steadyStateEquations[i].Equivalent}\\) into \\({steadyStateEquations[j].Equivalent}\\)");
+                        writeToTex($"Substitute \\({steadyStateEquations[i].Equivalent}\\) into \\({steadyStateEquations[j].Equivalent}\\).");
                         toggleMathMode();
                         steadyStateEquations[j].substituteEquation(steadyStateEquations[i]);
                         toggleMathMode();
@@ -141,10 +141,10 @@ namespace SteadyStateSolverWebApplication
             writeToTex($"Substitute \\(\\pi_{piName}\\) into 1");
             toggleMathMode();
             //writeToTex("");
-            writeToTex(equation + "\\\\");
-            writeToTex($"{roundedSum}\\pi_{piName} = 1" + "\\\\");
-            writeToTex($"\\pi_{piName} = {{1 \\over {roundedSum}\\pi_{piName}}}" + "\\\\");
-            writeToTex($"\\pi_{piName} = {Math.Round(1 / sum, 4)}" + "\\\\");
+            writeToTex($"$${equation}$$");
+            writeToTex($"$${roundedSum}\\pi_{piName} = 1$$");
+            writeToTex($"$$\\pi_{piName} = {{1 \\over {roundedSum}\\pi_{piName}}}$$");
+            writeToTex($"$$\\pi_{piName} = {Math.Round(1 / sum, 4)}$$");
             //writeToTex("");
         }
 
@@ -161,7 +161,7 @@ namespace SteadyStateSolverWebApplication
                 SolvedSteadyStateValue solvedSteadyStateValue = new SolvedSteadyStateValue(piName, relativeValue * pi1Value);
                 solvedSteadyStateValues.Add(solvedSteadyStateValue);
 
-                writeToTex($"\\pi_{piName} = {Math.Round(relativeValue, 4)} \\times {Math.Round(pi1Value, 4)} = {solvedSteadyStateValue.getRoundedValue()}" + "\\\\");
+                writeToTex($"$$\\pi_{piName} = {Math.Round(relativeValue, 4)} \\times {Math.Round(pi1Value, 4)} = {solvedSteadyStateValue.getRoundedValue()}$$");
             }
             //writeToTex("");
         }
@@ -209,9 +209,9 @@ namespace SteadyStateSolverWebApplication
                 for (int i = SteadyStateValues.Count - 1; i >= 0; i--)
                     if (SteadyStateValues[i].PiName == (subEquation.Equivalent.PiName))
                     {
-                        writeToTex(ToString().Replace(SteadyStateValues[i].ToString(), SteadyStateValues[i].getRoundedValue() + subEquation.ValuesAsString()) + "\\\\");
+                        writeToTex($"$${ToString().Replace(SteadyStateValues[i].ToString(), SteadyStateValues[i].getRoundedValue() + subEquation.ValuesAsString())}$$");
                         SubstituteValue(i, subEquation);
-                        writeToTex(ToString() + "\\\\");
+                        writeToTex($"$${ToString()}$$");
                     }
 
                 Consolidate();
@@ -235,15 +235,15 @@ namespace SteadyStateSolverWebApplication
                 SolveStepOne(ref needsSolving);
                 if (!needsSolving || Equivalent.Value == 1)
                 {
-                    writeToTex("");
+                    //writeToTex("");
                     return;
                 }
-                writeToTex(ToString() + "\\\\");
+                writeToTex($"$${ToString()}$$");
 
                 string equationString = "";
                 SolveStepTwo(ref equationString);
-                writeToTex(equationString + "\\\\");
-                writeToTex(ToString() + "\\\\");
+                writeToTex($"$${equationString}$$");
+                writeToTex($"$${ToString()}$$");
                 writeToTex("$$  $$");
             }
 
@@ -265,10 +265,10 @@ namespace SteadyStateSolverWebApplication
                 //step 2: adjust such that the equiv = 1
                 for (int i = 0; i < SteadyStateValues.Count - 1; i++)
                 {
-                    equationString += $"({{{SteadyStateValues[i]} \\over {Equivalent.getRoundedValue()}}}) + ";
+                    equationString += $"{{{SteadyStateValues[i]} \\over {Equivalent.getRoundedValue()}}} + ";
                     SteadyStateValues[i].Value /= Equivalent.Value;
                 }
-                equationString += $"({{{SteadyStateValues.Last()} \\over {Equivalent.getRoundedValue()}}}) = {Equivalent.PiName}";
+                equationString += $"{{{SteadyStateValues.Last()} \\over {Equivalent.getRoundedValue()}}} = {Equivalent.PiName}";
                 SteadyStateValues.Last().Value /= Equivalent.Value;
 
                 Equivalent.Value = 1;
@@ -290,7 +290,7 @@ namespace SteadyStateSolverWebApplication
 
                 removalIndices.ForEach(i => SteadyStateValues.RemoveAt(i));
 
-                writeToTex(ToString() + "\\\\");
+                writeToTex($"$${ToString()}$$");
             }
             #endregion substitution_steps
         }

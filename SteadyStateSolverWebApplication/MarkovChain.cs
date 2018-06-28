@@ -145,7 +145,7 @@ namespace SteadyStateSolverWebApplication
             writeToTex($"{roundedSum}\\pi_{piName} = 1" + "\\\\");
             writeToTex($"\\pi_{piName} = {{1 \\over {roundedSum}\\pi_{piName}}}" + "\\\\");
             writeToTex($"\\pi_{piName} = {Math.Round(1 / sum, 4)}" + "\\\\");
-            writeToTex("");
+            //writeToTex("");
         }
 
         private void adjustAll(decimal pi1Value)
@@ -163,7 +163,7 @@ namespace SteadyStateSolverWebApplication
 
                 writeToTex($"\\pi_{piName} = {Math.Round(relativeValue, 4)} \\times {Math.Round(pi1Value, 4)} = {solvedSteadyStateValue.getRoundedValue()}" + "\\\\");
             }
-            writeToTex("");
+            //writeToTex("");
         }
 
         private class SteadyStateEquation

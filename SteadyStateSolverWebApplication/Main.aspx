@@ -67,6 +67,6 @@
         <asp:Label ID="lblEquations" runat="server" Text="" allign="right"></asp:Label>
     </form>
     <button id="btnCopyTex" runat="server" onclick="copyTeX()" visible="False" title="copy TeX code to clipboard">TeX</button>
-    <input type="text" value="3223" runat="server" id="hiddenInput" class="hidden"/>
+    <textarea type="text" value="3223" runat="server" id="hiddenInput" class="hidden"/>
 </body>
 </html>

@@ -109,6 +109,6 @@ namespace SteadyStateSolverWebApplication {
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.HtmlControls.HtmlInputText hiddenInput;
+        protected global::System.Web.UI.HtmlControls.HtmlTextArea hiddenInput;
     }
 }

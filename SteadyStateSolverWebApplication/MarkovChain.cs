@@ -250,7 +250,7 @@ namespace SteadyStateSolverWebApplication
                     equationString += $"{{{SteadyStateValues[i]} \\over {Equivalent.getRoundedValue()}}} + ";
                     SteadyStateValues[i].Value /= Equivalent.Value;
                 }
-                equationString += $"{{{SteadyStateValues.Last()} \\over {Equivalent.getRoundedValue()}}} = {Equivalent.PiName}";
+                equationString += $"{{{SteadyStateValues.Last()} \\over {Equivalent.getRoundedValue()}}} = \\pi_{Equivalent.PiName}";
                 SteadyStateValues.Last().Value /= Equivalent.Value; //BUG: Can't divide by 0
 
                 Equivalent.Value = 1;

@@ -1,6 +1,6 @@
 # steady-state-equation-solver
 
-http://steadystatesolver.azurewebsites.net/
+https://steadystateequations.azurewebsites.net/main.aspx
 
 This application automates the tedious process of solving steady state values for [Markov Chains](https://en.wikipedia.org/wiki/Markov_chain).
 
